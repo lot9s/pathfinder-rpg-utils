@@ -8,8 +8,6 @@
 #
 
 from lxml.html import parse
-from urllib2 import urlopen
-from pandas.io.parsers import TextParser
 
 BASE_HREF = "http://www.d20pfsrd.com/"
 CREATURE_BY_CR_URL = "http://www.d20pfsrd.com/bestiary/-bestiary-by-challenge-rating"
