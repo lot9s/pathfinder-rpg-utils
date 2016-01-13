@@ -6,16 +6,29 @@
 
 from lxml.html import parse
 
-def get_creature_info(page):
-    '''Obtains information about the creature denoted by the given page.'''
-    try:
-        parsed_html = parse(page)
-        doc = parsed_html.getroot()
+class PFCreatureInfo:
+    '''Data structure representing a creature from the Pathfinder RPG'''
+    def __init__(self):
+        self.name = ""
+        self.cr = 0
+    def get_name(self, doc):
+        '''Get name from provided DOM object.'''
+    def update(self, page):
+        '''Update data structure with data found on the provided page.'''
+        try:
+            print page
+            parsed_html = parse(page)
+            doc = parsed_html.getroot()
     
-        name = get_creature_name(doc)
+            # get the creature's name and Challenge Rating
+            entry_bar_top = doc.cssselect('.sites-layout-tile th')
+            self.name = entry_bar_top[0].text
+            self.cr = entry_bar_top[1].text.split(' ')[1]
+            
+            print self.cr, self.name
 
-    except IOError:
-        return None
+        except IOError:
+            return None
 
 def get_creature_links(page):
     '''Obtains the list of links to all non-3rd party creatures on the given page'''
@@ -33,19 +46,6 @@ def get_creature_links(page):
             links.append(link)
     return links
     
-def get_creature_name(doc):
-    ''''Obtains creature name from the given document tree.'''
-    title = doc.cssselect('title')
-    if len(title) > 0:
-        name = title[0].text
-        if "3pp" in name or "3PP" in name:
-            return None
-        else:
-            name = name.split(' - ')
-            return name[0]
-    else:
-        return None
-
 def get_html_indeces():
     '''Obtains the list of links to pages of creatures clustered by Challenge Rating.'''
     file = open('indeces.txt', 'r')
@@ -61,4 +61,4 @@ if __name__ == '__main__':
     index = indeces[0]
     links = get_creature_links(index)
     for link in links:
-        get_creature_info(link)
+        PFCreatureInfo().update(link)
