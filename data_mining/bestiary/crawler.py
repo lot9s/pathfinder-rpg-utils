@@ -11,19 +11,26 @@ class PFCreatureInfo:
     def __init__(self):
         self.name = ""
         self.cr = 0
-    def get_name(self, doc):
-        '''Get name from provided DOM object.'''
+        
+    def update_name_and_cr(self, doc):
+        '''
+        Updates the name and CR of creature from provided DOM object.
+        '''
+        top_bar = doc.cssselect('.sites-layout-tile th')
+        if not top_bar:
+            top_bar = doc.cssselect('.sites-layout-tile td')
+            
+        self.name = top_bar[0].text
+        self.cr = top_bar[1].text
+        
     def update(self, page):
         '''Update data structure with data found on the provided page.'''
         try:
-            print page
             parsed_html = parse(page)
             doc = parsed_html.getroot()
     
-            # get the creature's name and Challenge Rating
-            entry_bar_top = doc.cssselect('.sites-layout-tile th')
-            self.name = entry_bar_top[0].text
-            self.cr = entry_bar_top[1].text.split(' ')[1]
+            # update the creature's name and Challenge Rating
+            self.update_name_and_cr(doc)
             
             print self.cr, self.name
 
@@ -61,4 +68,5 @@ if __name__ == '__main__':
     index = indeces[0]
     links = get_creature_links(index)
     for link in links:
+        print link
         PFCreatureInfo().update(link)
