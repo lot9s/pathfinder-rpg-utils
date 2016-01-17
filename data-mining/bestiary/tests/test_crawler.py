@@ -1,6 +1,9 @@
 '''A module that tests the basic functionality of functions and classes in the crawler module.'''
 
-import crawler
+import sys
+sys.path.append('..')
+
+from bestiary import crawler
 import unittest
 
 class TestPFCreatureInfo(unittest.TestCase):
