@@ -1,8 +1,4 @@
-#!/usr/bin/python
-#
-#   The purpose of this script is to construct a database of Pathfinder RPG creatures by crawling
-#   the d20pfsrd.
-#
+'''A module containing functions and classes that allow one to scrape specific information from the Bestiary pages of d20pfsrd.com'''
 
 from lxml.html import parse
 
@@ -16,9 +12,13 @@ class PFCreatureInfo:
         '''
         Updates the name and CR of creature from provided DOM object.
         '''
-        top_bar = doc.cssselect('.sites-layout-tile th')
+        top_bar = doc.cssselect('.sites-layout-tile th')            # try mining the table header
         if not top_bar:
-            top_bar = doc.cssselect('.sites-layout-tile td')
+            top_bar = doc.cssselect('.sites-layout-tile td')        # try mining the table entries
+            if top_bar and \
+               len(top_bar[0]) > 0 and \
+               top_bar[0][0].tag == 'b':                            # check if table entries are <b>
+                top_bar = [ top_bar[0][0], top_bar[1][0] ]
             
         self.name = top_bar[0].text
         self.cr = top_bar[1].text
@@ -60,6 +60,12 @@ def get_html_indeces():
     for i in range(len(indeces)):
         indeces[i] = indeces[i].rstrip()
     return indeces
+    
+def is_3pp(link):
+    '''Determines whether or not content from the given link is 3rd Party content or not.'''
+    if "corgi-dire" in link or link[-3:] == "-kp" or link[-4:] == "-3PP":
+        return True
+    return False
 
 # script 
 if __name__ == '__main__':
@@ -68,5 +74,7 @@ if __name__ == '__main__':
     index = indeces[0]
     links = get_creature_links(index)
     for link in links:
+        if is_3pp(link):
+            continue
         print link
         PFCreatureInfo().update(link)
