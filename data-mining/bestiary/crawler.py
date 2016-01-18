@@ -3,6 +3,10 @@
 from lxml.html import parse
 
 
+PROBLEM_LINKS = ['corgi-dire', 'darkwood-cobra', 'sinspawn-hub', 'TOC-']
+PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp']
+
+
 def get_creature_links(page):
     '''Obtains the list of links to all non-3rd party creatures on the given page'''
     parsed_html = parse(page)
@@ -12,10 +16,7 @@ def get_creature_links(page):
     links = []
     for element in elements:
         link = element.get('href')
-        if link != None and "monster-listings/" in link and \
-           not ('TOC-' in link or 'corgi-dire' in link or \
-                link[-5:] == "-TOHC" or link[-5:] == "-tohc" or \
-                link[-4:] == '-3PP' or link[-3:] == '-kp' or link[-3:] == '-ff'):           
+        if link != None and "monster-listings/" in link and not is_problem_link(link):           
             links.append(link)
     return links
     
@@ -27,6 +28,19 @@ def get_html_indeces():
         indeces[i] = indeces[i].rstrip()
     return indeces
     
+def is_problem_link(link):
+    '''Determines whether or not the provided link is a "problem" link. (i.e. link does not lead to a creature entry, etc.)'''
+    # check if link is on list of problematic links
+    for problem_link in PROBLEM_LINKS:
+        if problem_link in link:
+            return True
+    #check if link has a suffix on list of problematic suffixes
+    for suffix in PROBLEM_SUFFIXES:
+        if link[-1 * len(suffix):] == suffix:
+            return True
+    return False
+
+    
 class PFCreatureInfo:
     '''Data structure representing a creature from the Pathfinder RPG'''
     def __init__(self):
@@ -34,50 +48,25 @@ class PFCreatureInfo:
         self.cr = 0
     
     def find_name_or_cr_text(self, element):
-        if len(element) > 0:
-            nested_tag = element[0].tag
-            print 'tag-single', nested_tag
-            # nested element is of type <b>
-            if nested_tag == 'b':
-                return element[0]
-            # nested element is of type <br>
-            if nested_tag == 'br':
-                return element
-            # nested element is of type <font>
-            if nested_tag == 'font':
-                # doubly-nested element
-                if len(element[0]) > 0:
-                    nested_element = element[0]
-                    nested_tag = nested_element[0].tag
-                    print 'tag-double', nested_tag
-                    # doubly-nested element is of type <b>
-                    if nested_tag == 'b':
-                        return nested_element[0]
-                    # doubly-nested element is of type <br>
-                    if nested_tag == 'br':
-                        return element[0]
-                else:
-                    return element[0]
-        else:
-            return element
+        return element.text_content().strip()
     
     def update_name_and_cr(self, doc):
         '''
         Updates the name and CR of creature from provided DOM object.
         '''
-        # <th> element containing Name and CR
         info_element = doc.cssselect('td.sites-layout-tile th')
         
-        # <td> element containing Name and CR
+        # <td> element contains Name and CR
         if not info_element:
             info_element = doc.cssselect('td.sites-layout-tile td')
             child_l = info_element[0]
             child_r = info_element[1]
-            info_element[0] = self.find_name_or_cr_text(child_l)
-            info_element[1] = self.find_name_or_cr_text(child_r)
-        
-        self.name = info_element[0].text
-        self.cr = info_element[1].text
+            self.name = self.find_name_or_cr_text(child_l)
+            self.cr = self.find_name_or_cr_text(child_r)
+        # <th> element contains Name and CR
+        else:
+            self.name = info_element[0].text
+            self.cr = info_element[1].text
         
     def update(self, page):
         '''Update data structure with data found on the provided page.'''
