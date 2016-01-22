@@ -1,12 +1,15 @@
 '''A module containing functions and classes that allow one to scrape specific information from the Bestiary pages of d20pfsrd.com'''
 
 from lxml.html import parse
+import string
 
 
+# --- Constants ---
 PROBLEM_LINKS = ['corgi-dire', 'darkwood-cobra', 'sinspawn-hub', 'TOC-']
 PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp']
 
 
+# --- Functions ---
 def get_creature_links(page):
     '''Obtains the list of links to all non-3rd party creatures on the given page'''
     parsed_html = parse(page)
@@ -40,36 +43,45 @@ def is_problem_link(link):
             return True
     return False
 
-    
+
+# --- Classes --- 
 class PFCreatureInfo:
     '''Data structure representing a creature from the Pathfinder RPG'''
     def __init__(self):
         self.name = ""
         self.cr = 0
     
-    def find_name_or_cr_text(self, element):
-        return element.text_content().strip()
+    def format_name(self, name):
+        '''Returns copy of string argument with each word capitalized'''
+        new_name = name.lower()
+        # capitalize space-separated words
+        new_name = string.capwords(new_name, ' ')
+        # capitalize words following a hyphen
+        index = new_name.find('-') + 1
+        new_name = new_name[:index] +  new_name[index].upper() + new_name[index+1:]
+        # capitalize words following a left parenthesis
+        index = new_name.find('(') + 1
+        new_name = new_name[:index] +  new_name[index].upper() + new_name[index+1:]
+        return new_name
     
     def update_name_and_cr(self, doc):
         '''
-        Updates the name and CR of creature from provided DOM object.
+        Updates the name and CR of creature from provided DOM object
         '''
+        # <td> element contains Name and CR
         info_element = doc.cssselect('td.sites-layout-tile th')
         
-        # <td> element contains Name and CR
+        # <th> element contains Name and CR
         if not info_element:
             info_element = doc.cssselect('td.sites-layout-tile td')
-            child_l = info_element[0]
-            child_r = info_element[1]
-            self.name = self.find_name_or_cr_text(child_l)
-            self.cr = self.find_name_or_cr_text(child_r)
-        # <th> element contains Name and CR
-        else:
-            self.name = info_element[0].text
-            self.cr = info_element[1].text
+        
+        child_l = info_element[0]
+        child_r = info_element[1]
+        self.name = self.format_name(child_l.text_content().strip())
+        self.cr = child_r.text_content().strip()
         
     def update(self, page):
-        '''Update data structure with data found on the provided page.'''
+        '''Updates data structure with data found on the provided page'''
         try:
             parsed_html = parse(page)
             doc = parsed_html.getroot()
