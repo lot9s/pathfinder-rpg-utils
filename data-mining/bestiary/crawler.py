@@ -5,7 +5,7 @@ import string
 
 
 # --- Constants ---
-PROBLEM_LINKS = ['corgi-dire', 'darkwood-cobra', 'sinspawn-hub', 'TOC-']
+PROBLEM_LINKS = ['corgi-dire', 'darkwood-cobra', 'sinspawn-hub', 'templates', 'TOC-']
 PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp']
 
 
@@ -13,8 +13,9 @@ PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp']
 def get_creature_links(page):
     '''Obtains the list of links to all non-3rd party creatures on the given page'''
     parsed_html = parse(page)
-    doc = parsed_html.getroot()
-    elements = doc.cssselect('div a')
+    
+    root = parsed_html.getroot()
+    elements = root.cssselect('div a')
     
     links = []
     for element in elements:
@@ -32,7 +33,11 @@ def get_html_indeces():
     return indeces
     
 def is_problem_link(link):
-    '''Determines whether or not the provided link is a "problem" link. (i.e. link does not lead to a creature entry, etc.)'''
+    '''
+    Determines whether or not the provided link is a "problem" link. In this context, a 
+    "problem" link is defined as one that leads to a non-creature entry or 3rd-party
+    content. 
+    '''
     # check if link is on list of problematic links
     for problem_link in PROBLEM_LINKS:
         if problem_link in link:
@@ -42,17 +47,43 @@ def is_problem_link(link):
         if link[-1 * len(suffix):] == suffix:
             return True
     return False
+    
+def is_problem_page(root):
+    '''
+    Determines whether or not the provided web page is a "problem" page. In this context,
+    a "problm" page is defined as one that does not contain a 3rd-party creature.
+    '''
+    # check if publisher is a 3rd-party publisher
+    text_boxes = root.cssselect('.sites-embed-content-textbox')
+    if text_boxes:
+        for box in text_boxes:
+            box_text = box.text_content()
+            if (u'\xc2' in box_text or 'Copyright' in box_text) and\
+                not 'Paizo' in box_text:
+                return True
+    # check if title indicates that the creature has 3rd-party affiliation
+    title_element = root.cssselect('title')
+    title = title_element[0].text
+    if '3pp' in title:
+        return True
+    return False
 
 
 # --- Classes --- 
 class PFCreatureInfo:
-    '''Data structure representing a creature from the Pathfinder RPG'''
+    '''Object representing a creature from the Pathfinder RPG'''
     def __init__(self):
         self.name = ""
         self.cr = 0
     
+    def format_cr(self, cr):
+        '''Returns copy or string argument formatted as a proper CR'''
+        if not cr[2] == ' ':
+            return cr[:2] + ' ' + cr[2:]
+        return cr
+    
     def format_name(self, name):
-        '''Returns copy of string argument with each word capitalized'''
+        '''Returns copy of string argument formatted as a proper name'''
         new_name = name.lower()
         # capitalize space-separated words
         new_name = string.capwords(new_name, ' ')
@@ -63,45 +94,46 @@ class PFCreatureInfo:
         index = new_name.find('(') + 1
         new_name = new_name[:index] +  new_name[index].upper() + new_name[index+1:]
         return new_name
-    
-    def update_name_and_cr(self, doc):
+
+    def update(self, root):
         '''
-        Updates the name and CR of creature from provided DOM object
+        Updates the PFCreatureInfo object using ifnormation gleaned from the
+        root of the provided HtmlElement tree.
+        '''
+        try:
+            # update the creature's name and Challenge Rating
+            self.update_name_and_cr(root)
+            print self.cr, self.name
+            print ''
+        except IOError:
+            return None
+    
+    def update_name_and_cr(self, root):
+        '''
+        Updates the name and CR of creature using information gleaned from the
+        root of the provided HtmlElement tree.
         '''
         # <td> element contains Name and CR
-        info_element = doc.cssselect('td.sites-layout-tile th')
-        
+        info_element = root.cssselect('td.sites-layout-tile th')
         # <th> element contains Name and CR
         if not info_element:
-            info_element = doc.cssselect('td.sites-layout-tile td')
+            info_element = root.cssselect('td.sites-layout-tile td')
         
         child_l = info_element[0]
         child_r = info_element[1]
         self.name = self.format_name(child_l.text_content().strip())
-        self.cr = child_r.text_content().strip()
+        self.cr = self.format_cr(child_r.text_content().strip())
         
-    def update(self, page):
-        '''Updates data structure with data found on the provided page'''
-        try:
-            parsed_html = parse(page)
-            doc = parsed_html.getroot()
     
-            # update the creature's name and Challenge Rating
-            self.update_name_and_cr(doc)
-            
-            print self.cr, self.name
-            print ''
-
-        except IOError:
-            return None
-
-
-# script 
+# -- Script --- 
 if __name__ == '__main__':
     indeces = get_html_indeces()
-    
+    # scrape d20pfsrd for creature info
     index = indeces[0]
     links = get_creature_links(index)
     for link in links:
         print link
-        PFCreatureInfo().update(link)
+        parsed_html = parse(link)
+        root = parsed_html.getroot()
+        if not is_problem_page(root):
+            PFCreatureInfo().update(root)
