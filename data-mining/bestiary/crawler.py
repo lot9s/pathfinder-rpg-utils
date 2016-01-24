@@ -6,7 +6,8 @@ import string
 
 # --- Constants ---
 PROBLEM_LINKS = ['corgi-dire', 'darkwood-cobra', 'sinspawn-hub', 'templates', 'TOC-']
-PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp']
+PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb']
+THIRD_PARTY_PUBLISHERS = ['4 Winds Fantasy Gaming', 'Alluria Publishing', 'Frog God Games', 'Green Ronin Publishing', 'Jon Brazer Enterprises', 'Mystic Eye Games', 'Necromancer Games', 'Open Design LLC', 'Paizo Fans United', 'Super Genius Games', 'Tricky Owlbear Publishing']
 
 
 # --- Functions ---
@@ -54,13 +55,15 @@ def is_problem_page(root):
     a "problm" page is defined as one that does not contain a 3rd-party creature.
     '''
     # check if publisher is a 3rd-party publisher
-    text_boxes = root.cssselect('.sites-embed-content-textbox')
-    if text_boxes:
-        for box in text_boxes:
-            box_text = box.text_content()
-            if (u'\xc2' in box_text or 'Copyright' in box_text) and\
-                not 'Paizo' in box_text:
-                return True
+    #text_boxes = root.cssselect('.sites-embed-content-textbox')
+    footers = root.cssselect('.sites-tile-name-footer')
+    if footers:
+        for footer in footers:
+            footer_text = footer.text_content()
+            if u'\xc2' in footer_text or '(c)' in footer_text or 'Copyright' in footer_text:
+                for publisher in THIRD_PARTY_PUBLISHERS:
+                    if publisher in footer_text:
+                        return True
     # check if title indicates that the creature has 3rd-party affiliation
     title_element = root.cssselect('title')
     title = title_element[0].text
