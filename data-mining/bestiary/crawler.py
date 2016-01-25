@@ -7,7 +7,7 @@ import string
 # --- Constants ---
 PROBLEM_LINKS = ['corgi-dire', 'darkwood-cobra', 'sinspawn-hub', 'templates', 'TOC-']
 PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb']
-THIRD_PARTY_PUBLISHERS = ['4 Winds Fantasy Gaming', 'Alluria Publishing', 'Frog God Games', 'Green Ronin Publishing', 'Jon Brazer Enterprises', 'Mystic Eye Games', 'Necromancer Games', 'Open Design LLC', 'Paizo Fans United', 'Super Genius Games', 'Tricky Owlbear Publishing']
+THIRD_PARTY_PUBLISHERS = ['4 Winds Fantasy Gaming', 'Alluria Publishing', 'Frog God Games', 'Green Ronin Publishing', 'Jon Brazer Enterprises', 'Mystic Eye Games', 'Necromancer Games', 'Open Design LLC', 'Paizo Fans United', 'Super Genius Games', 'The Way of the Samurai', 'Tricky Owlbear Publishing']
 
 
 # --- Functions ---
@@ -81,9 +81,24 @@ class PFCreatureInfo:
     
     def format_cr(self, cr):
         '''Returns copy or string argument formatted as a proper CR'''
-        if not cr[2] == ' ':
-            return cr[:2] + ' ' + cr[2:]
-        return cr
+        formatted_cr = cr
+        # handle case where space between CR and number has been omitted
+        if not formatted_cr[:3] == 'CR ':
+            formatted_cr = cr[:2] + ' ' + cr[2:]
+        # handle case where creature has a mythic rank
+        if 'MR' in cr:
+            ranks = formatted_cr.split('/M')
+            # get challenge rating
+            cr_words = ranks[0].split(' ')
+            cr = int(cr_words[1])
+            # get mythic rank
+            mr_words = ranks[1].split(' ')
+            mr = int(mr_words[1])
+            # calculate new CR
+            formatted_cr = 'CR ' + str(cr + mr / 2)
+            if not mr % 2 == 0:
+                formatted_cr = formatted_cr + ' 1/2'
+        return formatted_cr
     
     def format_name(self, name):
         '''Returns copy of string argument formatted as a proper name'''
