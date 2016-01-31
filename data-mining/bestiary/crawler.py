@@ -6,7 +6,7 @@ from core.creature import Creature
 
 
 # --- Constants ---
-PROBLEM_LINKS = ['corgi-dire', 'darkwood-cobra', 'demodand-shaggy', 'demodand-slimy', 'demodand-tarry', 'demon-kalavakus', 'gashadokuru', 'great-white-shark', 'mimic-failed-apotheosis', 'mithral-cobra', 'mold-russet', 'protean-keketar', 'sinspawn-hub', 'sites.google.com', 'templates', 'TOC-']
+PROBLEM_LINKS = ['corgi-dire', 'darkwood-cobra', 'demodand-shaggy', 'demodand-slimy', 'demodand-tarry', 'demon-kalavakus', 'dretch', 'gashadokuru', 'great-white-shark', 'lemure', 'mimic-failed-apotheosis', 'mithral-cobra', 'mold-russet', 'protean-keketar', 'sinspawn-hub', 'sites.google.com', 'templates', 'TOC-']
 
 PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', '/rakshasa']
 
@@ -70,7 +70,7 @@ def is_problem_page(root):
     # check if title indicates that the creature has 3rd-party affiliation
     title_element = root.cssselect('title')
     title = title_element[0].text
-    if '3pp' in title:
+    if title and '3pp' in title:
         return True
     return False
         
@@ -82,7 +82,6 @@ if __name__ == '__main__':
     index = indeces[0]
     links = get_creature_links(index)
     for link in links:
-        print link
         parsed_html = parse(link)
         root = parsed_html.getroot()
         if not is_problem_page(root):

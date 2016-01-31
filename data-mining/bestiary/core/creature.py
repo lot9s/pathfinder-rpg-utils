@@ -1,6 +1,7 @@
 '''A module containing functions and classes for representing and manipulating creature information from the Pathfinder RPG'''
 
 
+import re
 import string
 
 
@@ -9,9 +10,15 @@ class Creature:
     def __init__(self):
         self.name = ""
         self.cr = 0
+        self.ac = {'AC': 0, 'touch': 0, 'flat-footed': 0}
     
     def format_cr(self, cr):
-        '''Returns copy or string argument formatted as a proper CR'''
+        '''
+        Returns copy of CR argument formatted appropriately
+        
+        :param cr: a string containing an unformatted Creature CR
+        :returns: a formatted Creature CR
+        '''
         formatted_cr = cr
         # handle case where space between CR and number has been omitted
         if not formatted_cr[:3] == 'CR ':
@@ -30,10 +37,31 @@ class Creature:
             if not mr % 2 == 0:
                 formatted_cr = formatted_cr + ' 1/2'
         return formatted_cr
+        
+    def format_entry(self, entry):
+        '''
+        Returns copy of creature entry formatted such that it is easily parsable
+        
+        :param entry: text of creature entry taken from a d20pfsrd bestiary page
+        :returns: a formatted copy of the Creature entry
+        '''
+        new_entry = entry.encode('ascii', 'ignore')
+        new_entry = re.sub(r"\s+", ' ', new_entry)
+        for attribute in ['AC', 'touch', 'flat-footed']:
+            index = new_entry.find(attribute)
+            if new_entry[index + len(attribute)] != ' ':
+                new_entry = new_entry[:index + len(attribute)] + ' ' + new_entry[index + len(attribute):]
+        return new_entry
     
     def format_name(self, name):
-        '''Returns copy of string argument formatted as a proper name'''
-        new_name = name.lower()
+        '''
+        Returns copy of name argument formatted appropriately
+        
+        :param name: a string containing an unformatted Creature name
+        :returns: a formatted Creature name
+        '''
+        new_name = name.encode('ascii', 'ignore')
+        new_name = new_name.lower()
         # capitalize space-separated words
         new_name = string.capwords(new_name, ' ')
         # capitalize words following a hyphen
@@ -43,24 +71,57 @@ class Creature:
         index = new_name.find('(') + 1
         new_name = new_name[:index] +  new_name[index].upper() + new_name[index+1:]
         return new_name
+        
+    def parse_ac(self, type, words):
+        '''
+        Parses one type of AC value from the text of a d20pfsrd bestiary page
+        
+        :param: type: the type {ac, flat-footed, touch} of AC to be parsed
+        :param: words: the text of a d20pfsrd bestiary page as a list of words
+        '''
+        index = words.index(type)
+        parsed_ac = words[index+1]
+        parsed_ac = parsed_ac.replace(",", "")
+        parsed_ac = parsed_ac.replace(";", "")
+        self.ac[type] = parsed_ac
 
     def update(self, root):
         '''
-        Updates the PFCreatureInfo object using ifnormation gleaned from the
-        root of the provided HtmlElement tree.
+        Updates the Creature object using data in root.
+        
+        :param root: root element of an HtmlElement tree created from a d20pfsrd bestiary page
         '''
         try:
             # update the creature's name and Challenge Rating
             self.update_name_and_cr(root)
-            print self.cr, self.name
-            print ''
+            self.update_ac(root)
+            print self.cr, self.name, "\t\t", "AC " + self.ac['AC'], "touch " + self.ac['touch'], "flat-footed " + self.ac['flat-footed']
         except IOError:
-            return None
+            print 'ERROR: problem encountered in Creature.update()'
+            
+    def update_ac(self, root):
+        '''
+        Updates the Creature object's AC using data in root.
+        
+        :param root: root element of an HtmlElement tree created from a d20pfsrd bestiary page
+        '''
+        # get the page's creature text
+        content = root.cssselect('.sites-canvas-main')
+        content_element = content[0]
+        content_text = content_element.text_content()
+        # format creature text such that it is easily parsable
+        content_text = self.format_entry(content_text)
+        content_words = content_text.split(' ')
+        # get AC values
+        self.parse_ac('AC', content_words)
+        self.parse_ac('touch', content_words)
+        self.parse_ac('flat-footed', content_words)
     
     def update_name_and_cr(self, root):
         '''
-        Updates the name and CR of creature using information gleaned from the
-        root of the provided HtmlElement tree.
+        Updates the Creature object's name and CR using data in root.
+        
+        :param root: root element of an HtmlElement tree created from a d20pfsrd bestiary page
         '''
         # <td> element contains Name and CR
         info_element = root.cssselect('td.sites-layout-tile th')
