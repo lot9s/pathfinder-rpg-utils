@@ -26,6 +26,10 @@ class TestPFCreatureInfo(unittest.TestCase):
         creature.update('http://www.d20pfsrd.com/bestiary/monster-listings/outsiders/elemental/elemental-ice/small-ice-elemental')
         self.assertEqual(creature.name, 'Small Ice Elemental')
         self.assertEqual(creature.cr, 'CR 1')
+        # Case 4 - Name and CR are in <th> and <td> elements, respectively
+        creature.update('http://www.d20pfsrd.com/bestiary/monster-listings/outsiders/demodand/demodand-tarry')
+        self.assertEqual(creature.name, 'Tarry Demodand')
+        self.assertEqual(creature.cr, 'CR 13')
 
 if __name__ == '__main__':
     unittest.main()
