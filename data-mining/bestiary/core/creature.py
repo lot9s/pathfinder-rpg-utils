@@ -45,8 +45,10 @@ class Creature:
         :param entry: text of creature entry taken from a d20pfsrd bestiary page
         :returns: a formatted copy of the Creature entry
         '''
-        new_entry = entry.encode('ascii', 'ignore')
-        new_entry = re.sub(r"\s+", ' ', new_entry)
+        new_entry = entry.encode('ascii', 'ignore') # remove unicode characters
+        new_entry = new_entry.replace(",", ", ")    # replace all ',' with ', ' for better str.split() behavior
+        new_entry = new_entry.replace("flatfooted", "flat-footed")
+        new_entry = re.sub(r"\s+", ' ', new_entry)  # replace all occurrences of white space with a single ' '
         for attribute in ['AC', 'touch', 'flat-footed']:
             index = new_entry.find(attribute)
             if new_entry[index + len(attribute)] != ' ':
@@ -60,7 +62,7 @@ class Creature:
         :param name: a string containing an unformatted Creature name
         :returns: a formatted Creature name
         '''
-        new_name = name.encode('ascii', 'ignore')
+        new_name = name.encode('ascii', 'ignore')   # remove unicode characters
         new_name = new_name.lower()
         # capitalize space-separated words
         new_name = string.capwords(new_name, ' ')
@@ -95,7 +97,8 @@ class Creature:
             # update the creature's name and Challenge Rating
             self.update_name_and_cr(root)
             self.update_ac(root)
-            print self.cr, self.name, "\t\t", "AC " + self.ac['AC'], "touch " + self.ac['touch'], "flat-footed " + self.ac['flat-footed']
+            print self.cr, self.name, "\t\t", \
+                "AC " + self.ac['AC'], "touch " + self.ac['touch'], "flat-footed " + self.ac['flat-footed']
         except IOError:
             print 'ERROR: problem encountered in Creature.update()'
             
