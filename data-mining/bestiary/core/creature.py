@@ -1,12 +1,12 @@
-'''A module containing functions and classes for representing and manipulating creature information from the Pathfinder RPG'''
+'''A module containing a class for representing and manipulating creature information from the Pathfinder RPG'''
 
 
 import re
 import string
 
 
-class Creature:
-    '''Object representing a creature from the Pathfinder RPG'''
+class Creature(object):
+    '''Class representing a creature from the Pathfinder RPG'''
     def __init__(self):
         self.name = ""
         self.cr = 0
@@ -36,6 +36,8 @@ class Creature:
             formatted_cr = 'CR ' + str(cr + mr / 2)
             if not mr % 2 == 0:
                 formatted_cr = formatted_cr + ' 1/2'
+        # replace any occurrence of * with ''
+        formatted_cr = formatted_cr.replace('*', '')
         return formatted_cr
         
     def format_entry(self, entry):
@@ -46,10 +48,11 @@ class Creature:
         :returns: a formatted copy of the Creature entry
         '''
         new_entry = entry.encode('ascii', 'ignore') # remove unicode characters
+        new_entry = new_entry.replace("*", "")      # remove '*' characters as they make parsing more difficult
         new_entry = new_entry.replace(",", ", ")    # replace all ',' with ', ' for better str.split() behavior
         new_entry = new_entry.replace("flatfooted", "flat-footed")
         new_entry = re.sub(r"\s+", ' ', new_entry)  # replace all occurrences of white space with a single ' '
-        for attribute in ['AC', 'touch', 'flat-footed']:
+        for attribute in ['DEFENSE', 'AC', 'touch', 'flat-footed']:
             index = new_entry.find(attribute)
             if new_entry[index + len(attribute)] != ' ':
                 new_entry = new_entry[:index + len(attribute)] + ' ' + new_entry[index + len(attribute):]
@@ -81,7 +84,7 @@ class Creature:
         :param: type: the type {ac, flat-footed, touch} of AC to be parsed
         :param: words: the text of a d20pfsrd bestiary page as a list of words
         '''
-        index = words.index(type)
+        index = words.index(type, words.index("AC")) # search for AC values after initial occurrence of 'AC'
         parsed_ac = words[index+1]
         parsed_ac = parsed_ac.replace(",", "")
         parsed_ac = parsed_ac.replace(";", "")

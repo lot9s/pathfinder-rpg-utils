@@ -1,11 +1,4 @@
-#!/usr/bin/python
-#
-#   This purpose of this script is to create a file containing an index of links to be used by
-#   other scripts.
-#
-#   More specifically, these links are absolute HTML paths to pages on the d20pfsrd that list 
-#   monster information from the Pathfinder RPG sorted by Challenge Rating.
-#
+'''A script that obtains a list of URLs from d20pfsrd.com, an unofficial System Reference Document (SRD) for the Pathfinder RPG. This list acts as an index of creatures sorted by Challenge Rating (CR).'''
 
 from lxml.html import parse
 
@@ -23,3 +16,4 @@ if __name__ == '__main__':
     for link in links:
         out.write(BASE_HREF + link.get('href') + '\n')
     out.close()
+    
