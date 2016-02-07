@@ -27,6 +27,26 @@ def create_db_entry(db_conn, link):
     :param db_conn: an open Connection object to a CreatureDB
     :param link: a string containing a link to a non-3rd party creature on d20pfsrd.com
     '''
+    for i in range(MAX_ATTEMPTS):
+        try:
+            html_tree = parse(link)
+            root = html_tree.getroot()
+            # if the link is acceptable, create a creature entry in our database
+            if not is_problem_page(root):
+                creature = Creature()
+                creature.update(root)
+                # create table for CR of this creature if none exists
+                db_conn.create_table(creature.cr)
+                db_conn.add_creature(creature)
+        # if I/O exception raised, try again
+        except IOError:
+            continue
+        # if successful, break out of loop
+        else:
+            break
+    # if not successful, exit cleanly
+    else:
+        raise Exception('ERROR: failed to download', link, 'after', MAX_ATTEMPTS, 'attempts.')
     
 
 def get_creature_links(page):
@@ -106,66 +126,22 @@ def is_problem_page(root):
 # non-3rd party Pathfinder creatures by scraping creature data from d20pfsrd.com
 if __name__ == '__main__':
     # open connection to sqlite3 database
-    db = CreatureDB()
+    db_connection = CreatureDB()
     
-    # get contents of file containing indeces to Pathfinder RPG creature pages
-    indeces = get_html_indeces()
-    
-    # iterate over each obtained index
-    for index in indeces:
-        links = get_creature_links(index)
-        # iterate over each link of the current index
-        for link in links:
-            # attempt to download the link we are interested in
-            for i in range(MAX_ATTEMPTS):
-                try:
-                    parsed_html = parse(link)
-                    root = parsed_html.getroot()
-                    # if the link is acceptable, create a creature entry in our database
-                    if not is_problem_page(root):
-                        creature = Creature()
-                        creature.update(root)
-                        # create table for CR of this creature if none exists
-                        db.create_table(creature.cr)
-                        db.add_creature(creature)
-                # if I/O exception raised, try again
-                except IOError:
-                    continue
-                # if successful, break out of loop
-                else:
-                    break
-            # if not successful, exit cleanly
-            else:
-                print 'ERROR: failed to download', link, 'after', MAX_ATTEMPTS, 'attempts.'
-                db.commit_and_close()
-                quit()
-    
-    # iterate over each link from the special index
-    special_index_file = open('INDEX_SPECIAL.txt', 'r')
-    for line in special_index_file:
-        # attempt to download the link we are interested in
-        for i in range(MAX_ATTEMPTS):
-            try:
-                html_tree = parse(line.strip())
-                root = html_tree.getroot()
-                # if the link is acceptable, create a creature entry in our database
-                if not is_problem_page(root):
-                    creature = Creature()
-                    creature.update(root)
-                    # create table for CR of this creature if none exists
-                    db.create_table(creature.cr)
-                    db.add_creature(creature)
-            # if I/O exception raised, try again
-            except IOError:
-                continue
-            # if successful, break out of loop
-            else:
-                break
-        # if not successful, exit cleanly
-        else:
-            print 'ERROR: failed to download', link, 'after', MAX_ATTEMPTS, 'attempts.'
-            db.commit_and_close()
-            quit()
+    try:
+        # create a creature database entry for each link reachable by our index
+        indeces = get_html_indeces()
+        for index in indeces:
+            links = get_creature_links(index)
+            # iterate over each link of the current index
+            for link in links:
+                create_db_entry(db_connection, link)
+        # create a creature database entry for each link in the special index
+        special_index_file = open('INDEX_SPECIAL.txt', 'r')
+        for line in special_index_file:
+            create_db_entry(db_connection, line.strip())
+    except Exception as e:
+        print e.args[0]
                 
     # clean up
-    db.commit_and_close()
+    db_connection.commit_and_close()
