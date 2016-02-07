@@ -48,7 +48,7 @@ def create_special_index_file(file_name='INDEX_SPECIAL.txt'):
     # open input files
     hub_file = open('LINKS_SPECIAL_HUB.txt', 'r')
     links_file = open('LINKS_SPECIAL.txt', 'r')
-    
+
     # open output files
     out = open(file_name, 'w')
     
@@ -60,6 +60,10 @@ def create_special_index_file(file_name='INDEX_SPECIAL.txt'):
         # write links to output file
         for link in link_table:
             out.write(link.get('href') + '\n')
+    
+    # get links from special pages
+    for line in links_file:
+        out.write(line)
     
     # clean up
     hub_file.close()

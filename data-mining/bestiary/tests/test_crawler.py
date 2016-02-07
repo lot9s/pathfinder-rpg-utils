@@ -28,10 +28,6 @@ class TestCreature(unittest.TestCase):
     def test_update_name_and_cr(self):
         '''Executes a small number of sanity checks for Creature.update_name_and_cr(...)'''
         self._test_update_name_and_cr(self.LINK_PREFIX + 'aberrations/akata', 'Akata', 'CR 1')
-        self._test_update_name_and_cr(self.LINK_PREFIX + 'oozes/amoeba-giant', 'Giant Amoeba', 'CR 1')
-        self._test_update_name_and_cr(self.LINK_PREFIX + 'vermin/ant/ant-giant-worker', 'Giant Ant Worker', 'CR 1')
-        self._test_update_name_and_cr(self.LINK_PREFIX + 'outsiders/elemental/elemental-ice/small-ice-elemental', \
-                                          'Small Ice Elemental', 'CR 1')
     
 
 if __name__ == '__main__':

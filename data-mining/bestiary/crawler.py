@@ -1,7 +1,5 @@
 '''A module containing functions that allow one to scrape data from the Bestiary pages of d20pfsrd.com and place it in a database'''
 
-import sqlite3
-
 from lxml.html import parse
 from core.creature import Creature
 from db.creatureDB import CreatureDB
@@ -134,8 +132,8 @@ if __name__ == '__main__':
         for index in indeces:
             links = get_creature_links(index)
             # iterate over each link of the current index
-            for link in links:
-                create_db_entry(db_connection, link)
+            for creature_link in links:
+                create_db_entry(db_connection, creature_link)
         # create a creature database entry for each link in the special index
         special_index_file = open('INDEX_SPECIAL.txt', 'r')
         for line in special_index_file:
