@@ -19,6 +19,16 @@ THIRD_PARTY_PUBLISHERS = ['4 Winds Fantasy Gaming', 'Alluria Publishing', 'Frog 
 
 
 # --- Functions ---
+def create_db_entry(db_conn, link):
+    '''
+    Attempts to create a row in a CreatureDB object using a link to a Creature page
+    on d20pfsrd.com
+    
+    :param db_conn: an open Connection object to a CreatureDB
+    :param link: a string containing a link to a non-3rd party creature on d20pfsrd.com
+    '''
+    
+
 def get_creature_links(page):
     '''
     Obtains the list of links to all non-3rd party creatures on the given page
@@ -40,7 +50,7 @@ def get_creature_links(page):
     
 def get_html_indeces():
     '''Obtains the list of links to pages of creatures clustered by Challenge Rating.'''
-    file = open('indeces.txt', 'r')
+    file = open('INDEX.txt', 'r')
     indeces = file.readlines()
     for i, item in enumerate(indeces):
         indeces[i] = indeces[i].rstrip()
@@ -129,6 +139,33 @@ if __name__ == '__main__':
                 print 'ERROR: failed to download', link, 'after', MAX_ATTEMPTS, 'attempts.'
                 db.commit_and_close()
                 quit()
+    
+    # iterate over each link from the special index
+    special_index_file = open('INDEX_SPECIAL.txt', 'r')
+    for line in special_index_file:
+        # attempt to download the link we are interested in
+        for i in range(MAX_ATTEMPTS):
+            try:
+                html_tree = parse(line.strip())
+                root = html_tree.getroot()
+                # if the link is acceptable, create a creature entry in our database
+                if not is_problem_page(root):
+                    creature = Creature()
+                    creature.update(root)
+                    # create table for CR of this creature if none exists
+                    db.create_table(creature.cr)
+                    db.add_creature(creature)
+            # if I/O exception raised, try again
+            except IOError:
+                continue
+            # if successful, break out of loop
+            else:
+                break
+        # if not successful, exit cleanly
+        else:
+            print 'ERROR: failed to download', link, 'after', MAX_ATTEMPTS, 'attempts.'
+            db.commit_and_close()
+            quit()
                 
     # clean up
     db.commit_and_close()

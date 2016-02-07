@@ -17,13 +17,9 @@ class CreatureDB(object):
         
         :param creature: a Creature object to be added to the database
         '''
-        query = 'insert into "' + creature.cr + '" (name, ac, touch_ac, flatfooted_ac) '
-        query = query + 'values ("' + creature.name + '", '
-        query = query + creature.ac['AC'] + ', '
-        query = query + creature.ac['touch'] + ', '
-        query = query + creature.ac['flat-footed'] + ')'
-        print query
-        self.connection.execute(query)
+        values = (creature.name, creature.ac['AC'], creature.ac['touch'], creature.ac['flat-footed'])
+        query = 'insert into "'+ creature.cr +'" (name, ac, touch_ac, flatfooted_ac) values (?,?,?,?)'
+        self.connection.execute(query, values)
     
     def commit_and_close(self):
         '''
