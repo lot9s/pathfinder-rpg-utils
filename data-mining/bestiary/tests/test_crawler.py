@@ -27,7 +27,11 @@ class TestCreature(unittest.TestCase):
         
     def test_update_name_and_cr(self):
         '''Executes a small number of sanity checks for Creature.update_name_and_cr(...)'''
+        # standard creature entry
         self._test_update_name_and_cr(self.LINK_PREFIX + 'aberrations/akata', 'Akata', 'CR 1')
+        # creature entry uses a non-standard mix of html elements for displaying name and CR
+        self._test_update_name_and_cr(self.LINK_PREFIX + 'outsiders/demodand/demodand-tarry', \
+                                        'Tarry Demodand', 'CR 13')
     
 
 if __name__ == '__main__':

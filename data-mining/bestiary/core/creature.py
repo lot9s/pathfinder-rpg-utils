@@ -132,13 +132,17 @@ class Creature(object):
         
         :param root: root element of an HtmlElement tree created from a d20pfsrd bestiary page
         '''
-        # <td> element contains Name and CR
-        info_element = root.cssselect('td.sites-layout-tile th')
-        # <th> element contains Name and CR
-        if not info_element:
-            info_element = root.cssselect('td.sites-layout-tile td')
+        # get html element with creature's name and CR
+        info_element = root.cssselect('td.sites-layout-tile tr')
         
-        child_l = info_element[0]
-        child_r = info_element[1]
-        self.name = self.format_name(child_l.text_content().strip())
-        self.cr = self.format_cr(child_r.text_content().strip())
+        # get separate strings for the creature's name and CR
+        info_text = info_element[0].text_content()
+        info_text = info_text.strip()
+        info_text = re.sub(r"\s+", ' ', info_text)  # replace all occurrences of white space with a single ' '
+        
+        creature_name = info_text[:info_text.index('CR')-1]
+        creature_cr = info_text[info_text.index('CR'):]
+        
+        # update creature name and cr after formatting
+        self.name = self.format_name(creature_name)
+        self.cr = self.format_cr(creature_cr)

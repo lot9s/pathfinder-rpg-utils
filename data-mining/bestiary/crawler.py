@@ -12,7 +12,7 @@ __all__ = ['create_db_entry', 'get_creature_links', 'get_html_indeces', 'is_prob
 # the maximum number of retries allowed when attempting to download a web page
 MAX_ATTEMPTS = 3
 
-PROBLEM_LINKS = ['/chimera', '/corgi-dire', '/darkwood-cobra', '/demodand-shaggy', '/demodand-slimy', '/demodand-tarry', '/demon-kalavakus', '/dlurgraven', '/dretch', '/formian-hive-queen', '/gashadokuru', '/great-white-shark', '/lemure', '/mimic-failed-apotheosis', '/minotaur-elder', '/mithral-cobra', '/mold-russet', '/protean-keketar', '/protean-imentesh', '/sinspawn-hub', '/zombie-hill-giant', 'sites.google.com', 'templates', 'TOC-']
+PROBLEM_LINKS = ['/corgi-dire', '/darkwood-cobra', '/dlurgraven', '/formian-hive-queen', '/minotaur-elder', '/mithral-cobra', '/mold-russet', '/sinspawn-hub', '/zombie-hill-giant', 'sites.google.com', 'templates', 'TOC-']
 
 PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', '/rakshasa']
 
