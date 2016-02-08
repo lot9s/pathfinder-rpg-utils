@@ -5,14 +5,14 @@ from core.creature import Creature
 from db.creatureDB import CreatureDB
 
 
-__all__ = ['create_db_entry', 'get_creature_links', 'get_html_indeces', 'is_problem_link', 'is_problem_page']
+__all__ = ['create_db_entry_from_csv', 'create_db_entry_from_link', 'get_creature_links', 'get_html_indeces', 'is_problem_link', 'is_problem_page']
 
 
 # --- Constants ---
 # the maximum number of retries allowed when attempting to download a web page
 MAX_ATTEMPTS = 3
 
-PROBLEM_LINKS = ['/corgi-dire', '/darkwood-cobra', '/dlurgraven', '/formian-hive-queen', '/minotaur-elder', '/mithral-cobra', '/mold-russet', '/sinspawn-hub', '/zombie-hill-giant', 'sites.google.com', 'templates', 'TOC-']
+PROBLEM_LINKS = ['/corgi-dire', '/darkwood-cobra', '/dlurgraven', '/formian-hive-queen', '/gashadokuru', '/minotaur-elder', '/mithral-cobra', '/mold-russet', '/sinspawn-hub', '/zombie-hill-giant', 'sites.google.com', 'templates', 'TOC-']
 
 PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', '/rakshasa']
 
@@ -20,7 +20,32 @@ THIRD_PARTY_PUBLISHERS = ['4 Winds Fantasy Gaming', 'Alluria Publishing', 'Frog 
 
 
 # --- Functions ---
-def create_db_entry(db_conn, link):
+def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
+    '''
+    Creates a row in a CreatureDB object using a .csv file containing creature
+    attributes as described in the documentation for this project.
+    
+    :param db_conn: an open Connection object to a CreatureDB
+    :param file_name: the name of the .csv file containing the creature data
+    '''
+    # get creature data from .csv file
+    creature_file = open(file_name, 'r')
+    for line in creature_file:
+        # skip first line
+        if line[:3] == 'CR,':
+            continue
+        # create Creature object
+        creature = Creature()
+        creature_attributes = line.strip().split(',')
+        creature.update_via_list(creature_attributes)
+        # add Creature object to database
+        db_conn.create_table(creature.cr)
+        db_conn.add_creature(creature)
+        
+    # clean up
+    creature_file.close()
+
+def create_db_entry_from_link(db_conn, link):
     '''
     Attempts to create a row in a CreatureDB object using a link to a Creature page
     on d20pfsrd.com
@@ -35,7 +60,7 @@ def create_db_entry(db_conn, link):
             # if the link is acceptable, create a creature entry in our database
             if not is_problem_page(root):
                 creature = Creature()
-                creature.update(root)
+                creature.update_via_htmlelement(root)
                 # create table for CR of this creature if none exists
                 db_conn.create_table(creature.cr)
                 db_conn.add_creature(creature)
@@ -129,6 +154,7 @@ if __name__ == '__main__':
     # open connection to sqlite3 database
     db_connection = CreatureDB()
     
+    # add entries to creature database via links to pages on d20pfsrd.com
     try:
         # create a creature database entry for each link reachable by our index
         indeces = get_html_indeces()
@@ -136,13 +162,16 @@ if __name__ == '__main__':
             links = get_creature_links(index)
             # iterate over each link of the current index
             for creature_link in links:
-                create_db_entry(db_connection, creature_link)
+                create_db_entry_from_link(db_connection, creature_link)
         # create a creature database entry for each link in the special index
         special_index_file = open('INDEX_SPECIAL.txt', 'r')
         for line in special_index_file:
-            create_db_entry(db_connection, line.strip())
+            create_db_entry_from_link(db_connection, line.strip())
     except Exception as e:
         print e.args[0]
+    
+    # add entries to creature database via .csv file
+    create_db_entries_from_csv(db_connection)
                 
     # clean up
     db_connection.commit_and_close()

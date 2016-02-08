@@ -20,7 +20,7 @@ class TestCreature(unittest.TestCase):
         root = parsed_html.getroot()
         # create a Crature object populated by information from the provided link
         creature = Creature()
-        creature.update(root)
+        creature.update_via_htmlelement(root)
         # check to see if the Creature object's attributes match expectations
         self.assertEqual(creature.name, expected_name)
         self.assertEqual(creature.cr, expected_cr)

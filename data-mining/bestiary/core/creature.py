@@ -92,21 +92,6 @@ class Creature(object):
         parsed_ac = parsed_ac.replace(",", "")
         parsed_ac = parsed_ac.replace(";", "")
         self.ac[type] = parsed_ac
-
-    def update(self, root):
-        '''
-        Updates the Creature object using data in root.
-        
-        :param root: root element of an HtmlElement tree created from a d20pfsrd bestiary page
-        '''
-        try:
-            # update the creature's name and Challenge Rating
-            self.update_name_and_cr(root)
-            self.update_ac(root)
-            print self.cr, self.name, "\t\t", \
-                "AC " + self.ac['AC'], "touch " + self.ac['touch'], "flat-footed " + self.ac['flat-footed']
-        except IOError:
-            print 'ERROR: problem encountered in Creature.update()'
             
     def update_ac(self, root):
         '''
@@ -146,3 +131,30 @@ class Creature(object):
         # update creature name and cr after formatting
         self.name = self.format_name(creature_name)
         self.cr = self.format_cr(creature_cr)
+
+    def update_via_htmlelement(self, root):
+        '''
+        Updates the Creature object using data in root.
+        
+        :param root: root element of an HtmlElement tree created from a d20pfsrd bestiary page
+        '''
+        try:
+            # update the creature's name and Challenge Rating
+            self.update_name_and_cr(root)
+            self.update_ac(root)
+            print self.cr, self.name, "\t\t", \
+                "AC " + self.ac['AC'], "touch " + self.ac['touch'], "flat-footed " + self.ac['flat-footed']
+        except IOError:
+            print 'ERROR: problem encountered in Creature.update_via_htmlelement()'
+
+    def update_via_list(self, attr_list):
+        '''
+        Updates the Creature object using a list of creature attributes taken from a .csv file
+        
+        :param attr_list: a list of creature attributes (strings) taken from a .csv file
+        '''
+        self.cr = attr_list[0]
+        self.name = attr_list[1]
+        self.ac['AC'] = attr_list[2]
+        self.ac['touch'] = attr_list[3]
+        self.ac['flat-footed'] = attr_list[4]
