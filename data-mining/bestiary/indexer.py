@@ -9,6 +9,9 @@ This list is meant to act as an index of creatures sorted by Challenge Rating (C
 from lxml.html import parse
 
 
+__all__ = ['create_index_file', 'create_special_index_file']
+
+
 # --- Constants ---
 BASE_HREF = "http://www.d20pfsrd.com/"
 CREATURE_BY_CR_URL = "http://www.d20pfsrd.com/bestiary/-bestiary-by-challenge-rating"

@@ -5,6 +5,9 @@ import re
 import string
 
 
+__all__ = ['Creature']
+
+
 class Creature(object):
     '''Class representing a creature from the Pathfinder RPG'''
     def __init__(self):

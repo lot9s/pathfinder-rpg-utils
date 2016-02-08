@@ -5,6 +5,9 @@ from core.creature import Creature
 from db.creatureDB import CreatureDB
 
 
+__all__ = ['create_db_entry', 'get_creature_links', 'get_html_indeces', 'is_problem_link', 'is_problem_page']
+
+
 # --- Constants ---
 # the maximum number of retries allowed when attempting to download a web page
 MAX_ATTEMPTS = 3

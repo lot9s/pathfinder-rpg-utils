@@ -4,6 +4,9 @@
 import sqlite3
 
 
+__all__ = ['CreatureDB']
+
+
 class CreatureDB(object):
     '''Class for storing Creature objects in a SQLite database.'''
     def __init__(self, name='creature.db'):
