@@ -1,6 +1,5 @@
-# pathfinder-rpg-utils
-A collection of utility scripts related to the Pathfinder Roleplaying Game.
+# Pathfinder RPG - Utility Scripts
+This repository contains scripts that make playing, running, or creating Pathfinder games easier.
 
-WIP:
-data-mining/bestiary
-- The purpose of the scripts in this folder is to produce a database of non-3rd party creatures from the Pathfinder RPG by scraping the Bestiary pages of d20pfsrd.com
+### data-mining/bestiary
+The scripts in this folder can produce a database of non-3rd party creatures from the Pathfinder RPG by scraping the Bestiary pages of www.d20pfsrd.com
