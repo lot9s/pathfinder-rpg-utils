@@ -15,7 +15,10 @@ class Creature(object):
         self.name = ""
         self.cr = 0
         self.ac = {'AC': 0, 'touch': 0, 'flat-footed': 0}
-    
+        
+    def __repr__(self):
+        return ' '.join([self.cr, self.name, '\t', str(self.ac)])
+        
     def format_cr(self, cr):
         '''
         Returns copy of CR argument formatted appropriately
@@ -146,8 +149,6 @@ class Creature(object):
             # update the creature's name and Challenge Rating
             self.update_name_and_cr(root)
             self.update_ac(root)
-            print self.cr, self.name, "\t\t", \
-                "AC " + self.ac['AC'], "touch " + self.ac['touch'], "flat-footed " + self.ac['flat-footed']
         except IOError:
             print 'ERROR: failed to update creature data'
 
