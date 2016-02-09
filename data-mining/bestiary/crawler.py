@@ -1,22 +1,34 @@
-'''A module containing functions that allow one to scrape data from the Bestiary pages of d20pfsrd.com and place it in a database'''
+'''A module containing functions that allow one to scrape data from the Bestiary 
+pages of d20pfsrd.com and place it in a database'''
 
 from lxml.html import parse
 from core.creature import Creature
 from db.creatureDB import CreatureDB
 
 
-__all__ = ['create_db_entry_from_csv', 'create_db_entry_from_link', 'get_creature_links', 'get_html_indeces', 'is_problem_link', 'is_problem_page']
+__all__ = ['create_db_entries_from_csv', 'create_db_entry_from_link', 
+           'get_creature_links', 'get_html_indeces', 'is_problem_link', 
+           'is_problem_page']
 
 
 # --- Constants ---
 # the maximum number of retries allowed when attempting to download a web page
 MAX_ATTEMPTS = 3
 
-PROBLEM_LINKS = ['/corgi-dire', '/darkwood-cobra', '/dlurgraven', '/formian-hive-queen', '/gashadokuru', '/minotaur-elder', '/mithral-cobra', '/mold-russet', '/sinspawn-hub', '/zombie-hill-giant', 'sites.google.com', 'templates', 'TOC-']
+PROBLEM_LINKS = ['/corgi-dire', '/darkwood-cobra', '/dlurgraven', 
+                 '/formian-hive-queen', '/gashadokuru', '/minotaur-elder', 
+                 '/mithral-cobra', '/mold-russet', '/sinspawn-hub', 
+                 '/zombie-hill-giant', 'sites.google.com', 'templates', 'TOC-']
 
-PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', '/rakshasa']
+PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', 
+                    '/rakshasa']
 
-THIRD_PARTY_PUBLISHERS = ['4 Winds Fantasy Gaming', 'Alluria Publishing', 'Frog God Games', 'Green Ronin Publishing', 'Jon Brazer Enterprises', 'Mystic Eye Games', 'Necromancer Games', 'Open Design LLC', 'Paizo Fans United', 'Super Genius Games', 'The Way of the Samurai', 'Tricky Owlbear Publishing']
+THIRD_PARTY_PUBLISHERS = ['4 Winds Fantasy Gaming', 'Alluria Publishing', 
+                          'Frog God Games', 'Green Ronin Publishing', 
+                          'Jon Brazer Enterprises', 'Mystic Eye Games', 
+                          'Necromancer Games', 'Open Design LLC', 
+                          'Paizo Fans United', 'Super Genius Games', 
+                          'The Way of the Samurai', 'Tricky Owlbear Publishing']
 
 
 # --- Functions ---
@@ -30,13 +42,13 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
     '''
     # get creature data from .csv file
     creature_file = open(file_name, 'r')
-    for line in creature_file:
+    for next_line in creature_file:
         # skip first line
-        if line[:3] == 'CR,':
+        if next_line[:3] == 'CR,':
             continue
         # create Creature object
         creature = Creature()
-        creature_attributes = line.strip().split(',')
+        creature_attributes = next_line.strip().split(',')
         creature.update_via_list(creature_attributes)
         # add Creature object to database
         db_conn.create_table(creature.cr)
@@ -47,11 +59,11 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
 
 def create_db_entry_from_link(db_conn, link):
     '''
-    Attempts to create a row in a CreatureDB object using a link to a Creature page
-    on d20pfsrd.com
+    Attempts to create a row in a CreatureDB object using a link to a Creature 
+    page on d20pfsrd.com
     
     :param db_conn: an open Connection object to a CreatureDB
-    :param link: a string containing a link to a non-3rd party creature on d20pfsrd.com
+    :param link: string containing link to non-3rd party creature on d20pfsrd
     '''
     for i in range(MAX_ATTEMPTS):
         try:
@@ -72,14 +84,14 @@ def create_db_entry_from_link(db_conn, link):
             break
     # if not successful, exit cleanly
     else:
-        raise Exception('ERROR: failed to download', link, 'after', MAX_ATTEMPTS, 'attempts.')
+        raise Exception('ERROR: failed to download', link)
     
 
 def get_creature_links(page):
     '''
     Obtains the list of links to all non-3rd party creatures on the given page
     
-    :param page: a string containing the complete link to a Bestiary page on d20pfsrd.com
+    :param page: string containing complete link to Bestiary page on d20pfsrd
     :returns: the list of links to all non-3rd party creatures on the given page
     '''
     parsed_html = parse(page)
@@ -87,29 +99,33 @@ def get_creature_links(page):
     root = parsed_html.getroot()
     elements = root.cssselect('div a')
     
-    links = []
+    creature_links = []
     for element in elements:
         link = element.get('href')
-        if link != None and "monster-listings/" in link and not is_problem_link(link):           
-            links.append(link)
-    return links
+        if link != None and\
+           "monster-listings/" in link and not is_problem_link(link):           
+            creature_links.append(link)
+    return creature_links
     
 def get_html_indeces():
-    '''Obtains the list of links to pages of creatures clustered by Challenge Rating.'''
-    file = open('INDEX.txt', 'r')
-    indeces = file.readlines()
-    for i, item in enumerate(indeces):
-        indeces[i] = indeces[i].rstrip()
-    return indeces
+    '''
+    Obtains the list of links to pages of creatures clustered by 
+    Challenge Rating (CR)
+    '''
+    index_file = open('INDEX.txt', 'r')
+    creature_indeces = index_file.readlines()
+    for i, item in enumerate(creature_indeces):
+        creature_indeces[i] = creature_indeces[i].rstrip()
+    return creature_indeces
     
 def is_problem_link(link):
     '''
-    Determines whether or not the provided link is a "problem" link. In this context, a 
-    "problem" link is defined as one that leads to a non-creature entry or 3rd-party
-    content.
+    Determines whether or not the provided link is a "problem" link. In this 
+    context, a "problem" link is defined as one that leads to a non-creature 
+    entry or 3rd-party content.
     
-    :param link: a string containing the complete link to a Bestiary page on d20pfsrd.com
-    :returns: True if the link is a problem link, False otherwise
+    :param link: string containing complete link to Bestiary page on d20pfsrd
+    :returns: True if the link is a "problem" link, False otherwise
     '''
     # check if link is on list of problematic links
     for problem_link in PROBLEM_LINKS:
@@ -123,8 +139,9 @@ def is_problem_link(link):
     
 def is_problem_page(root):
     '''
-    Determines whether or not the provided web page is a "problem" page. In this context,
-    a "problm" page is defined as one that does not contain a 3rd-party creature.
+    Determines whether or not the provided web page is a "problem" page. In this 
+    context, a "problm" page is defined as one that does not contain a 3rd-party 
+    creature.
     
     :param root: the root HtmlElement node of a Bestiary page from d20pfsrd.com
     :returns: True if the page is a problem page, False otherwise
@@ -135,7 +152,8 @@ def is_problem_page(root):
     if footers:
         for footer in footers:
             footer_text = footer.text_content()
-            if u'\xc2' in footer_text or '(c)' in footer_text or 'Copyright' in footer_text:
+            if u'\xc2' in footer_text or\
+               '(c)' in footer_text or 'Copyright' in footer_text:
                 for publisher in THIRD_PARTY_PUBLISHERS:
                     if publisher in footer_text:
                         return True
@@ -148,8 +166,9 @@ def is_problem_page(root):
 
     
 # --- Script --- 
-# By default, if this module is executed as a script, it will try to build a database of
-# non-3rd party Pathfinder creatures by scraping creature data from d20pfsrd.com
+# By default, if this module is executed as a script, it will try to build a 
+# database of non-3rd party Pathfinder creatures by scraping creature data from 
+# d20pfsrd.com
 if __name__ == '__main__':
     # open connection to sqlite3 database
     db_connection = CreatureDB()

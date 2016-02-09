@@ -1,8 +1,10 @@
 '''
 This module contains a script and functions for obtaining a list of URLs from 
-d20pfsrd.com, an unofficial System Reference Document (SRD) for the Pathfinder RPG. 
+d20pfsrd.com, an unofficial System Reference Document (SRD) for the 
+Pathfinder RPG. 
 
-This list is meant to act as an index of creatures sorted by Challenge Rating (CR).
+This list is meant to act as an index of creatures sorted by 
+Challenge Rating (CR).
 '''
 
 
@@ -20,8 +22,8 @@ CREATURE_BY_CR_URL = "http://www.d20pfsrd.com/bestiary/-bestiary-by-challenge-ra
 # --- Functions ---
 def create_index_file(file_name='INDEX.txt'):
     '''
-    Creates an index of links to d20pfsrd.com pages that contain links to Creature
-    pages sorted by Challenge Rating (CR).
+    Creates an index of links to d20pfsrd.com pages that contain links to 
+    creature pages sorted by Challenge Rating (CR)
     
     :param file_name: the name of the output file
     '''

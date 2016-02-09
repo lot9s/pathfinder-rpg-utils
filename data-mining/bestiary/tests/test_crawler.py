@@ -1,4 +1,5 @@
-'''A module that tests the basic functionality of functions and classes in the crawler module.'''
+'''A module that tests the basic functionality of functions and classes in the 
+crawler module.'''
 
 
 import sys
@@ -14,7 +15,14 @@ class TestCreature(unittest.TestCase):
     LINK_PREFIX = 'http://www.d20pfsrd.com/bestiary/monster-listings/'
     
     def _test_update_name_and_cr(self, link, expected_name, expected_cr):
-        '''Executes a single, specific sanity check for Creature.update_name_and_cr(...)'''
+        '''
+        Executes a single, specific sanity check for 
+        Creature.update_name_and_cr(...)
+        
+        :param link: string containing link to non-3rd party creature
+        :param expected_name: the name of the creature we expect to see
+        :param expected_cr: the cr of the creature we expect to see
+        '''
         # get root node of an HtmlElement tree representing the provided link
         parsed_html = parse(link)
         root = parsed_html.getroot()
@@ -26,12 +34,16 @@ class TestCreature(unittest.TestCase):
         self.assertEqual(creature.cr, expected_cr)
         
     def test_update_name_and_cr(self):
-        '''Executes a small number of sanity checks for Creature.update_name_and_cr(...)'''
+        '''
+        Executes a small number of sanity checks for 
+        Creature.update_name_and_cr(...)
+        '''
         # standard creature entry
-        self._test_update_name_and_cr(self.LINK_PREFIX + 'aberrations/akata', 'Akata', 'CR 1')
+        self._test_update_name_and_cr(self.LINK_PREFIX + 'aberrations/akata',\
+                                      'Akata', 'CR 1')
         # creature entry uses a non-standard mix of html elements for displaying name and CR
         self._test_update_name_and_cr(self.LINK_PREFIX + 'outsiders/demodand/demodand-tarry', \
-                                        'Tarry Demodand', 'CR 13')
+                                      'Tarry Demodand', 'CR 13')
     
 
 if __name__ == '__main__':

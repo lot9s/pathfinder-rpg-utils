@@ -1,4 +1,5 @@
-'''A module containing a class for representing and manipulating creature information from the Pathfinder RPG'''
+'''A module containing a class for representing and manipulating creature 
+information from the Pathfinder RPG'''
 
 
 import re
@@ -51,10 +52,10 @@ class Creature(object):
         :returns: a formatted copy of the Creature entry
         '''
         new_entry = entry.encode('ascii', 'ignore') # remove unicode characters
-        new_entry = new_entry.replace("*", "")      # remove '*' characters as they make parsing more difficult
-        new_entry = new_entry.replace(",", ", ")    # replace all ',' with ', ' for better str.split() behavior
+        new_entry = new_entry.replace("*", "")      
+        new_entry = new_entry.replace(",", ", ")    
         new_entry = new_entry.replace("flatfooted", "flat-footed")
-        new_entry = re.sub(r"\s+", ' ', new_entry)  # replace all occurrences of white space with a single ' '
+        new_entry = re.sub(r"\s+", ' ', new_entry)  
         for attribute in ['DEFENSE', 'AC', 'touch', 'flat-footed']:
             index = new_entry.find(attribute)
             if new_entry[index + len(attribute)] != ' ':
@@ -95,9 +96,10 @@ class Creature(object):
             
     def update_ac(self, root):
         '''
-        Updates the Creature object's AC using data in root.
+        Updates the Creature object's AC using data in root of HtmlElement tree
+        corresponding to the Creature's page on d20pfsrd.com
         
-        :param root: root element of an HtmlElement tree created from a d20pfsrd bestiary page
+        :param root: root element of an HtmlElement tree
         '''
         # get the page's creature text
         content = root.cssselect('.sites-canvas-main')
@@ -113,17 +115,18 @@ class Creature(object):
     
     def update_name_and_cr(self, root):
         '''
-        Updates the Creature object's name and CR using data in root.
+        Updates the Creature object's name and CR using data in root of 
+        HtmlElement tree corresponding to the Creature's page on d20pfsrd.com
         
-        :param root: root element of an HtmlElement tree created from a d20pfsrd bestiary page
+        :param root: root element of an HtmlElement tree
         '''
         # get html element with creature's name and CR
         info_element = root.cssselect('td.sites-layout-tile tr')
-        
         # get separate strings for the creature's name and CR
         info_text = info_element[0].text_content()
         info_text = info_text.strip()
-        info_text = re.sub(r"\s+", ' ', info_text)  # replace all occurrences of white space with a single ' '
+        # replace all occurrences of white space with a single ' '
+        info_text = re.sub(r"\s+", ' ', info_text)
         
         creature_name = info_text[:info_text.index('CR')-1]
         creature_cr = info_text[info_text.index('CR'):]
@@ -134,9 +137,10 @@ class Creature(object):
 
     def update_via_htmlelement(self, root):
         '''
-        Updates the Creature object using data in root.
+        Updates the Creature object using data in root element of a Bestiary 
+        page from d20pfsrd.com
         
-        :param root: root element of an HtmlElement tree created from a d20pfsrd bestiary page
+        :param root: root element of an HtmlElement tree created
         '''
         try:
             # update the creature's name and Challenge Rating
@@ -145,13 +149,14 @@ class Creature(object):
             print self.cr, self.name, "\t\t", \
                 "AC " + self.ac['AC'], "touch " + self.ac['touch'], "flat-footed " + self.ac['flat-footed']
         except IOError:
-            print 'ERROR: problem encountered in Creature.update_via_htmlelement()'
+            print 'ERROR: failed to update creature data'
 
     def update_via_list(self, attr_list):
         '''
-        Updates the Creature object using a list of creature attributes taken from a .csv file
+        Updates the Creature object using a list of creature attributes taken 
+        from a .csv file
         
-        :param attr_list: a list of creature attributes (strings) taken from a .csv file
+        :param attr_list: list of attributes (strings) from a .csv file
         '''
         self.cr = attr_list[0]
         self.name = attr_list[1]
