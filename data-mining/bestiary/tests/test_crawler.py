@@ -12,7 +12,27 @@ from bestiary.core.creature import Creature
 
 class TestCreature(unittest.TestCase):
     '''This class tests the validity of crawler.PFCreatureInfo'''
+    
     LINK_PREFIX = 'http://www.d20pfsrd.com/bestiary/monster-listings/'
+    
+    def _test_update_abilities(self, link, expected_abilities):
+        '''
+        Executes a single, specific sanity check for 
+        Creature.update_name_and_cr(...)
+        
+        :param link: string containing link to non-3rd party creature
+        :param expected_abilities: dictionary of expected ability scores
+        '''
+        # get root node of an HtmlElement tree representing the provided link
+        parsed_html = parse(link)
+        root = parsed_html.getroot()
+        # create Creature object populated by information from the provided link
+        creature = Creature()
+        creature.update_via_htmlelement(root)
+        # check to see if the Creature object's attributes match expectations
+        for key in creature.ability_scores.keys():
+            self.assertEqual(creature.ability_scores[key], \
+                             expected_abilities[key])
     
     def _test_update_name_and_cr(self, link, expected_name, expected_cr):
         '''
@@ -26,22 +46,32 @@ class TestCreature(unittest.TestCase):
         # get root node of an HtmlElement tree representing the provided link
         parsed_html = parse(link)
         root = parsed_html.getroot()
-        # create a Crature object populated by information from the provided link
+        # create Creature object populated by information from the provided link
         creature = Creature()
         creature.update_via_htmlelement(root)
         # check to see if the Creature object's attributes match expectations
         self.assertEqual(creature.name, expected_name)
-        self.assertEqual(creature.cr, expected_cr)
+        self.assertEqual(creature.cr, expected_cr)    
+    
+    def test_update_abilities(self):
+        '''
+        Executes a small number of sanity checks for 
+        Creature._update_values(...)
+        '''
+        # problem - does not get value for CHA
+        self._test_update_abilities(self.LINK_PREFIX + 'animals/herd-animals/camel', \
+                                    {'Str': '18', 'Dex': '16', 'Con': '14', 'Int': '2', 'Wis': '11', 'Cha': '4'})
         
     def test_update_name_and_cr(self):
         '''
         Executes a small number of sanity checks for 
-        Creature.update_name_and_cr(...)
+        Creature._update_name_and_cr(...)
         '''
-        # standard creature entry
+        # problem - standard creature entry
         self._test_update_name_and_cr(self.LINK_PREFIX + 'aberrations/akata',\
                                       'Akata', 'CR 1')
-        # creature entry uses a non-standard mix of html elements for displaying name and CR
+        # problem - creature entry uses a non-standard mix of html elements for 
+        # displaying name and CR
         self._test_update_name_and_cr(self.LINK_PREFIX + 'outsiders/demodand/demodand-tarry', \
                                       'Tarry Demodand', 'CR 13')
     

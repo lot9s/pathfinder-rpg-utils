@@ -9,95 +9,168 @@ import string
 __all__ = ['Creature']
 
 
+# --- Constants ---
+ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
+ATTRIBUTES = ['DEFENSE', 'AC', 'touch', 'flat-footed', 'STATISTICS', 'Base']
+
+
+# --- Functions ---
+def check_text_for_spaces(text, keywords, start=0):
+    '''
+    Checks text for spaces before and after certain keywords. If a space is not 
+    present, it gets inserted into the text in the appropriate place.
+    
+    :param text: the text to be checked
+    :param keywords: the keywords that require spaces after them in the text
+    :param start: starting index in text to begin checking at
+    :returns a new version of the given text with spaces where they should be
+    '''
+    _text = text
+    for word in keywords:
+        indx = _text.find(word, start)
+        # check for space after keyword
+        if _text[indx + len(word)] != ' ':
+            _text = insert_text(_text, indx + len(word), ' ')
+        indx = _text.find(word, start)
+        # check for space before keyword
+        if _text[indx-1] != ' ':
+            _text = insert_text(_text, indx, ' ')
+    return _text
+    
+def format_creature_cr(cr):
+    '''
+    Returns copy of CR argument formatted appropriately
+    
+    :param cr: a string containing an unformatted Creature CR
+    :returns: a formatted Creature CR
+    '''
+    formatted_cr = cr
+    # handle case where space between CR and number has been omitted
+    if not formatted_cr[:3] == 'CR ':
+        formatted_cr = cr[:2] + ' ' + cr[2:]
+    # handle case where creature has a mythic rank
+    if 'MR' in cr:
+        ranks = formatted_cr.split('/M')
+        # get challenge rating
+        cr_words = ranks[0].split(' ')
+        cr = int(cr_words[1])
+        # get mythic rank
+        mr_words = ranks[1].split(' ')
+        mr = int(mr_words[1])
+        # calculate new CR
+        formatted_cr = 'CR ' + str(cr + mr / 2)
+        if not mr % 2 == 0:
+            formatted_cr = formatted_cr + ' 1/2'
+    # replace any occurrence of * with ''
+    formatted_cr = formatted_cr.replace('*', '')
+    return formatted_cr
+    
+def format_creature_entry(entry):
+    '''
+    Returns copy of creature entry formatted such that it is easily parsable
+    
+    :param entry: text of creature entry taken from a d20pfsrd bestiary page
+    :returns: a formatted copy of the Creature entry
+    '''
+    _entry = entry.encode('ascii', 'ignore') # remove unicode characters
+    _entry = _entry.replace("*", "")      
+    _entry = _entry.replace(",", ", ")    
+    _entry = _entry.replace("flatfooted", "flat-footed")
+    _entry = re.sub(r"\s+", ' ', _entry) 
+    # add spaces where needed
+    _entry = check_text_for_spaces(_entry, ATTRIBUTES)
+    _entry = check_text_for_spaces(_entry, ABILITIES, _entry.find('STATISTICS'))
+    return _entry
+
+def format_creature_name(name):
+    '''
+    Returns copy of name argument formatted appropriately
+    
+    :param name: a string containing an unformatted Creature name
+    :returns: a formatted Creature name
+    '''
+    new_name = name.encode('ascii', 'ignore')   # remove unicode characters
+    new_name = new_name.lower()
+    # capitalize space-separated words
+    new_name = string.capwords(new_name, ' ')
+    # capitalize words following a hyphen
+    indx = new_name.find('-') + 1
+    new_name = new_name[:indx] +  new_name[indx].upper() + new_name[indx+1:]
+    # capitalize words following a left parenthesis
+    indx = new_name.find('(') + 1
+    new_name = new_name[:indx] +  new_name[indx].upper() + new_name[indx+1:]
+    return new_name
+    
+def insert_text(orig_text, index, insert_text):
+    '''
+    Inserts a string into another string at a given index and returns it
+    
+    :param orig_text: the original string
+    :param index: index of original string to insert text into
+    :param insert_text: the string that will be inserted into the original
+    :returns the new string after the insertion
+    '''
+    return "%s%s%s" % (orig_text[:index], insert_text, orig_text[index:])
+
+
+# --- Classes ---
 class Creature(object):
     '''Class representing a creature from the Pathfinder RPG'''
+    
     def __init__(self):
         self.name = ""
         self.cr = 0
-        self.ac = {'AC': 0, 'touch': 0, 'flat-footed': 0}
+        self.ability_scores = {'Str': '0', 'Dex': '0', 'Con': '0', 
+                               'Int': '0', 'Wis': '0', 'Cha': '0'}
+        self.ac = {'AC': '0', 'touch': '0', 'flat-footed': '0'}
         
     def __repr__(self):
-        return ' '.join([self.cr, self.name, '\t', str(self.ac)])
-        
-    def format_cr(self, cr):
-        '''
-        Returns copy of CR argument formatted appropriately
-        
-        :param cr: a string containing an unformatted Creature CR
-        :returns: a formatted Creature CR
-        '''
-        formatted_cr = cr
-        # handle case where space between CR and number has been omitted
-        if not formatted_cr[:3] == 'CR ':
-            formatted_cr = cr[:2] + ' ' + cr[2:]
-        # handle case where creature has a mythic rank
-        if 'MR' in cr:
-            ranks = formatted_cr.split('/M')
-            # get challenge rating
-            cr_words = ranks[0].split(' ')
-            cr = int(cr_words[1])
-            # get mythic rank
-            mr_words = ranks[1].split(' ')
-            mr = int(mr_words[1])
-            # calculate new CR
-            formatted_cr = 'CR ' + str(cr + mr / 2)
-            if not mr % 2 == 0:
-                formatted_cr = formatted_cr + ' 1/2'
-        # replace any occurrence of * with ''
-        formatted_cr = formatted_cr.replace('*', '')
-        return formatted_cr
-        
-    def format_entry(self, entry):
-        '''
-        Returns copy of creature entry formatted such that it is easily parsable
-        
-        :param entry: text of creature entry taken from a d20pfsrd bestiary page
-        :returns: a formatted copy of the Creature entry
-        '''
-        new_entry = entry.encode('ascii', 'ignore') # remove unicode characters
-        new_entry = new_entry.replace("*", "")      
-        new_entry = new_entry.replace(",", ", ")    
-        new_entry = new_entry.replace("flatfooted", "flat-footed")
-        new_entry = re.sub(r"\s+", ' ', new_entry)  
-        for attribute in ['DEFENSE', 'AC', 'touch', 'flat-footed']:
-            index = new_entry.find(attribute)
-            if new_entry[index + len(attribute)] != ' ':
-                new_entry = new_entry[:index + len(attribute)] + ' ' + new_entry[index + len(attribute):]
-        return new_entry
+        values = [self.cr, self.name, '\n',
+                  str(self.ability_scores), '\n', 
+                  str(self.ac)]
+        return ' '.join(values)
     
-    def format_name(self, name):
-        '''
-        Returns copy of name argument formatted appropriately
+    def __str__(self):
+        values = [self.cr, self.name, '\n',
+                  'Str', self.ability_scores['Str'],
+                  'Dex', self.ability_scores['Dex'],
+                  'Con', self.ability_scores['Con'],
+                  'Int', self.ability_scores['Int'],
+                  'Wis', self.ability_scores['Wis'],
+                  'Cha', self.ability_scores['Cha'], '\n',
+                  'AC', self.ac['AC'],
+                  'touch', self.ac['touch'],
+                  'flat-footed', self.ac['flat-footed'], '\n\n']
+        return ' '.join(values)
         
-        :param name: a string containing an unformatted Creature name
-        :returns: a formatted Creature name
+    def _update_abilities(self, words):
         '''
-        new_name = name.encode('ascii', 'ignore')   # remove unicode characters
-        new_name = new_name.lower()
-        # capitalize space-separated words
-        new_name = string.capwords(new_name, ' ')
-        # capitalize words following a hyphen
-        index = new_name.find('-') + 1
-        new_name = new_name[:index] +  new_name[index].upper() + new_name[index+1:]
-        # capitalize words following a left parenthesis
-        index = new_name.find('(') + 1
-        new_name = new_name[:index] +  new_name[index].upper() + new_name[index+1:]
-        return new_name
+        Updates the Creature's ability score values using the Creature's entry
+        on d20pfsrd.com split into individual words
         
-    def parse_ac(self, type, words):
+        :param words: the text of a d20pfsrd bestiary page as a list of words
         '''
-        Parses one type of AC value from the text of a d20pfsrd bestiary page
+        for key in self.ability_scores.keys():
+            index = words.index(key, words.index("Str"))
+            parsed_ability = words[index+1]
+            parsed_ability = parsed_ability.replace(",", "")
+            self.ability_scores[key] = parsed_ability
         
-        :param: type: the type {ac, flat-footed, touch} of AC to be parsed
-        :param: words: the text of a d20pfsrd bestiary page as a list of words
+    def _update_ac(self, words):
         '''
-        index = words.index(type, words.index("AC")) # search for AC values after initial occurrence of 'AC'
-        parsed_ac = words[index+1]
-        parsed_ac = parsed_ac.replace(",", "")
-        parsed_ac = parsed_ac.replace(";", "")
-        self.ac[type] = parsed_ac
-            
-    def update_ac(self, root):
+        Updates the Creature's armor class values using the Creature's entry
+        on d20pfsrd.com split into individual words
+        
+        :param words: the text of a d20pfsrd bestiary page as a list of words
+        '''
+        for key in self.ac.keys():
+            index = words.index(key, words.index("AC"))
+            parsed_ac = words[index+1]
+            parsed_ac = parsed_ac.replace(",", "")
+            parsed_ac = parsed_ac.replace(";", "")
+            self.ac[key] = parsed_ac
+        
+    def _update_values(self, root):
         '''
         Updates the Creature object's AC using data in root of HtmlElement tree
         corresponding to the Creature's page on d20pfsrd.com
@@ -109,14 +182,13 @@ class Creature(object):
         content_element = content[0]
         content_text = content_element.text_content()
         # format creature text such that it is easily parsable
-        content_text = self.format_entry(content_text)
+        content_text = format_creature_entry(content_text)
         content_words = content_text.split(' ')
-        # get AC values
-        self.parse_ac('AC', content_words)
-        self.parse_ac('touch', content_words)
-        self.parse_ac('flat-footed', content_words)
+        # update all Creature values
+        self._update_abilities(content_words)
+        self._update_ac(content_words)
     
-    def update_name_and_cr(self, root):
+    def _update_name_and_cr(self, root):
         '''
         Updates the Creature object's name and CR using data in root of 
         HtmlElement tree corresponding to the Creature's page on d20pfsrd.com
@@ -135,8 +207,8 @@ class Creature(object):
         creature_cr = info_text[info_text.index('CR'):]
         
         # update creature name and cr after formatting
-        self.name = self.format_name(creature_name)
-        self.cr = self.format_cr(creature_cr)
+        self.name = format_creature_name(creature_name)
+        self.cr = format_creature_cr(creature_cr)
 
     def update_via_htmlelement(self, root):
         '''
@@ -146,9 +218,8 @@ class Creature(object):
         :param root: root element of an HtmlElement tree created
         '''
         try:
-            # update the creature's name and Challenge Rating
-            self.update_name_and_cr(root)
-            self.update_ac(root)
+            self._update_name_and_cr(root)
+            self._update_values(root)
         except IOError:
             print 'ERROR: failed to update creature data'
 

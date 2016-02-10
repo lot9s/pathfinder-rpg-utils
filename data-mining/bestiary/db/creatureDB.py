@@ -1,4 +1,5 @@
-'''A module containing a class for storing Creature objects in a SQLite database.'''
+'''A module containing a class for storing Creature objects in a 
+SQLite database.'''
 
 
 import sqlite3
@@ -7,12 +8,13 @@ import sqlite3
 __all__ = ['CreatureDB']
 
 
-COLUMNS = ("id integer primary key autoincrement", "name varchar(35)", 
+COLUMNS = ("id integer primary key autoincrement", "name varchar(45)", 
            "ac integer", "touch_ac integer", "flatfooted_ac integer")
 
 
 class CreatureDB(object):
     '''Class for storing Creature objects in a SQLite database.'''
+    
     def __init__(self, name='creature.db'):
         self.tables = []
         self.connection = sqlite3.connect(name)
