@@ -9,6 +9,8 @@ __all__ = ['CreatureDB']
 
 
 COLUMNS = ("id integer primary key autoincrement", "name varchar(45)", 
+           "Str integer", "Dex integer", "Con integer", 
+           "Int integer", "Wis integer", "Cha integer", 
            "ac integer", "touch_ac integer", "flatfooted_ac integer")
 
 
@@ -27,12 +29,19 @@ class CreatureDB(object):
         
         :param creature: a Creature object to be added to the database
         '''
-        values = (creature.name, 
-                  creature.ac['AC'], creature.ac['touch'], 
+        values = (creature.name,
+                  creature.ability_scores['Str'], 
+                  creature.ability_scores['Dex'], 
+                  creature.ability_scores['Con'], 
+                  creature.ability_scores['Int'], 
+                  creature.ability_scores['Wis'], 
+                  creature.ability_scores['Cha'],
+                  creature.ac['AC'], 
+                  creature.ac['touch'], 
                   creature.ac['flat-footed'])
         query = '''insert into "%s" 
-                   (name, ac, touch_ac, flatfooted_ac) 
-                   values (?,?,?,?)''' % creature.cr
+                   (name,Str,Dex,Con,Int,Wis,Cha,ac,touch_ac,flatfooted_ac) 
+                   values (?,?,?,?,?,?,?,?,?,?)''' % creature.cr
         self.connection.execute(query, values)
     
     def commit_and_close(self):
@@ -56,7 +65,7 @@ class CreatureDB(object):
         # create table
         query_values = (name,) + COLUMNS
         query = '''create table if not exists "%s" 
-                   (%s, %s, %s, %s, %s)''' % query_values
+                   (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''' % query_values
         self.connection.execute(query)
         # add table name to list of tables
         self.tables.append(name)
