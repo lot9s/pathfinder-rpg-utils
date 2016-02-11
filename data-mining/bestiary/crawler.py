@@ -52,7 +52,6 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
         creature.update_via_list(creature_attributes)
         print creature
         # add Creature object to database
-        db_conn.create_table(creature.cr)
         db_conn.add_creature(creature)
         
     # clean up
@@ -76,7 +75,6 @@ def create_db_entry_from_link(db_conn, link):
                 creature.update_via_htmlelement(root)
                 print creature
                 # create table for CR of this creature if none exists
-                db_conn.create_table(creature.cr)
                 db_conn.add_creature(creature)
         # if I/O exception raised, try again
         except IOError:
