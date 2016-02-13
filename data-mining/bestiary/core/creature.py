@@ -47,7 +47,7 @@ def format_creature_cr(cr):
     formatted_cr = cr
     # handle case where space between CR and number has been omitted
     if not formatted_cr[:3] == 'CR ':
-        formatted_cr = cr[:2] + ' ' + cr[2:]
+        formatted_cr = insert_text(cr, 2, ' ')   
     # handle case where creature has a mythic rank
     if 'MR' in cr:
         ranks = formatted_cr.split('/M')
@@ -58,9 +58,17 @@ def format_creature_cr(cr):
         mr_words = ranks[1].split(' ')
         mr = int(mr_words[1])
         # calculate new CR
-        formatted_cr = 'CR ' + str(cr + mr / 2)
+        formatted_cr = str(cr + mr / 2)
         if not mr % 2 == 0:
-            formatted_cr = formatted_cr + ' 1/2'
+            formatted_cr = formatted_cr + '.5'
+    # handle standard case
+    else:
+        cr_words = formatted_cr.split(' ')
+        formatted_cr = cr_words[1]
+        if '/' in formatted_cr:
+            formatted_cr = str(float(formatted_cr[0]) / float(formatted_cr[2]))
+            if len(formatted_cr) > 4:
+                formatted_cr = formatted_cr[:4]
     # replace any occurrence of * with ''
     formatted_cr = formatted_cr.replace('*', '')
     return formatted_cr

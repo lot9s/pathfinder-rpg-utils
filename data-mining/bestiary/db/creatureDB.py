@@ -9,7 +9,7 @@ __all__ = ['CreatureDB']
 
 
 COLUMNS = ("id integer primary key autoincrement", 
-           "name varchar(45)", "CR varchar(10)", 
+           "name varchar(45)", "CR real", 
            "Str integer", "Dex integer", "Con integer", 
            "Int integer", "Wis integer", "Cha integer", 
            "ac integer", "touch_ac integer", "flatfooted_ac integer")
@@ -66,3 +66,8 @@ class CreatureDB(object):
         '''
         self.connection.commit()
         self.connection.close()
+    
+    def export_as_csv(self):
+        '''Exports the data in this object as a .csv file.'''
+        # TODO: complete writing this method
+        return
