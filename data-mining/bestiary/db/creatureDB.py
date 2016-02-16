@@ -79,7 +79,8 @@ class CreatureDB(object):
         # write data to output file
         csv_file = open(file_name, 'w')
         writer = csv.writer(csv_file)
-        writer.writerow(['id', 'name', 'CR',
+        writer.writerow(['id', 
+                         'name', 'CR',
                          'Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha',
                          'ac', 'touch_ac', 'flatfooted_ac'])
         writer.writerows(data)

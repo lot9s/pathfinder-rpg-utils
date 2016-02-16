@@ -167,6 +167,9 @@ def is_problem_page(root):
 # By default, if this module is executed as a script, it will try to build a 
 # database of non-3rd party Pathfinder creatures by scraping creature data from 
 # d20pfsrd.com
+#
+# The resulting database will be exported in both .db (SQLite 3) and 
+# .csv formats.
 if __name__ == '__main__':
     # open connection to sqlite3 database
     db_connection = CreatureDB()
