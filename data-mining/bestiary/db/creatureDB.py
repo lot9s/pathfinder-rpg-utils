@@ -2,6 +2,7 @@
 SQLite database.'''
 
 
+import csv
 import sqlite3
 
 
@@ -67,7 +68,19 @@ class CreatureDB(object):
         self.connection.commit()
         self.connection.close()
     
-    def export_as_csv(self):
-        '''Exports the data in this object as a .csv file.'''
-        # TODO: complete writing this method
-        return
+    def export_as_csv(self, file_name='creature.csv'):
+        '''
+        Exports the data in this object as a .csv file.
+        
+        :param file_name: the name of the output csv file
+        '''
+        cursor = self.connection.cursor()
+        data = cursor.execute('select * from creatures')
+        # write data to output file
+        csv_file = open(file_name, 'w')
+        writer = csv.writer(csv_file)
+        writer.writerow(['id', 'name', 'CR',
+                         'Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha',
+                         'ac', 'touch_ac', 'flatfooted_ac'])
+        writer.writerows(data)
+        csv_file.close()
