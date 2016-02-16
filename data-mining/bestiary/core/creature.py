@@ -163,6 +163,7 @@ class Creature(object):
             index = words.index(key, words.index("STATISTICS"))
             parsed_ability = words[index+1]
             parsed_ability = parsed_ability.replace(",", "")
+            parsed_ability = parsed_ability.replace(";", "")
             self.ability_scores[key] = parsed_ability
         
     def _update_ac(self, words):
