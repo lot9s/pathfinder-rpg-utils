@@ -84,10 +84,11 @@ def format_creature_entry(entry):
     _entry = _entry.replace("*", "")      
     _entry = _entry.replace(",", ", ")    
     _entry = _entry.replace("flatfooted", "flat-footed")
-    _entry = re.sub(r"\s+", ' ', _entry) 
     # add spaces where needed
     _entry = check_text_for_spaces(_entry, ATTRIBUTES)
     _entry = check_text_for_spaces(_entry, ABILITIES, _entry.find('STATISTICS'))
+    # replace all occurrences of white space with a single ' '
+    _entry = re.sub(r"\s+", ' ', _entry)
     return _entry
 
 def format_creature_name(name):
@@ -159,7 +160,7 @@ class Creature(object):
         :param words: the text of a d20pfsrd bestiary page as a list of words
         '''
         for key in self.ability_scores.keys():
-            index = words.index(key, words.index("Str"))
+            index = words.index(key, words.index("STATISTICS"))
             parsed_ability = words[index+1]
             parsed_ability = parsed_ability.replace(",", "")
             self.ability_scores[key] = parsed_ability
@@ -210,13 +211,21 @@ class Creature(object):
         info_text = info_text.strip()
         # replace all occurrences of white space with a single ' '
         info_text = re.sub(r"\s+", ' ', info_text)
-        
+        # get creature's name and CR
         creature_name = info_text[:info_text.index('CR')-1]
         creature_cr = info_text[info_text.index('CR'):]
-        
         # update creature name and cr after formatting
         self.name = format_creature_name(creature_name)
         self.cr = format_creature_cr(creature_cr)
+        
+    def is_valid(self):
+        '''
+        Determines whether or not the Creature object has valid attribute values
+        
+        :returns True if Creature object is valid, False otherwise
+        '''
+        # TODO: write this method
+        return False
 
     def update_via_htmlelement(self, root):
         '''
