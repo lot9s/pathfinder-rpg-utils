@@ -29,6 +29,7 @@ class TestCreature(unittest.TestCase):
         # create Creature object populated by information from the provided link
         creature = Creature()
         creature.update_via_htmlelement(root)
+        print creature
         # check to see if the Creature object's attributes match expectations
         for key in creature.ability_scores.keys():
             self.assertEqual(creature.ability_scores[key], \
@@ -60,7 +61,11 @@ class TestCreature(unittest.TestCase):
         '''
         # problem - does not get value for CHA
         self._test_update_abilities(self.LINK_PREFIX + 'animals/herd-animals/camel', \
-                                    {'Str': '18', 'Dex': '16', 'Con': '14', 'Int': '2', 'Wis': '11', 'Cha': '4'})
+                                    {'Str': '18', 'Dex': '16', 'Con': '14', 
+                                     'Int': '2', 'Wis': '11', 'Cha': '4'})
+        self._test_update_abilities(self.LINK_PREFIX + 'oozes/amoeba-giant', \
+                                    {'Str': '12', 'Dex': '1', 'Con': '16', 
+                                     'Int': '-1', 'Wis': '1', 'Cha': '1'})
         
     def test_update_name_and_cr(self):
         '''
@@ -69,11 +74,11 @@ class TestCreature(unittest.TestCase):
         '''
         # problem - standard creature entry
         self._test_update_name_and_cr(self.LINK_PREFIX + 'aberrations/akata',\
-                                      'Akata', 'CR 1')
+                                      'Akata', '1')
         # problem - creature entry uses a non-standard mix of html elements for 
         # displaying name and CR
         self._test_update_name_and_cr(self.LINK_PREFIX + 'outsiders/demodand/demodand-tarry', \
-                                      'Tarry Demodand', 'CR 13')
+                                      'Tarry Demodand', '13')
     
 
 if __name__ == '__main__':

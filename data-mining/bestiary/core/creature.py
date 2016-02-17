@@ -164,7 +164,10 @@ class Creature(object):
             parsed_ability = words[index+1]
             parsed_ability = parsed_ability.replace(",", "")
             parsed_ability = parsed_ability.replace(";", "")
-            self.ability_scores[key] = parsed_ability
+            if parsed_ability == '' or '-' in parsed_ability:
+                self.ability_scores[key] = '-1'
+            else:
+                self.ability_scores[key] = parsed_ability
         
     def _update_ac(self, words):
         '''
