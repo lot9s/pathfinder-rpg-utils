@@ -25,10 +25,8 @@ class CreatureDB(object):
         self._create_table()
         
     def _create_table(self):
-        '''
-        Creates a SQLite table with the given name for storing Creature objects 
-        if it does not already exist. The table will have columns for names and 
-        AC values.
+        '''Creates a SQLite table with the given name for storing 
+        Creature objects if it does not already exist
     
         :param name: a string value for the name of the table
         '''
@@ -38,9 +36,8 @@ class CreatureDB(object):
         self.connection.execute(query)
         
     def add_creature(self, creature):
-        '''
-        Adds a Creature object as a row in the appropriate table of the SQLite 
-        database.
+        '''Adds a Creature object as a row in the appropriate table 
+        of the SQLite database
         
         :param creature: a Creature object to be added to the database
         '''
@@ -61,16 +58,14 @@ class CreatureDB(object):
         self.connection.execute(query, values)
     
     def commit_and_close(self):
-        '''
-        Commits any uncommitted changes to the SQLite database and closes the 
-        connection
+        '''Commits any uncommitted changes to the SQLite database and 
+        closes the connection
         '''
         self.connection.commit()
         self.connection.close()
     
     def export_as_csv(self, file_name='creature.csv'):
-        '''
-        Exports the data in this object as a .csv file.
+        '''Exports the data in this object as a .csv file.
         
         :param file_name: the name of the output csv file
         '''

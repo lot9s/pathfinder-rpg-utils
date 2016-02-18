@@ -33,9 +33,8 @@ THIRD_PARTY_PUBLISHERS = ['4 Winds Fantasy Gaming', 'Alluria Publishing',
 
 # --- Functions ---
 def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
-    '''
-    Creates a row in a CreatureDB object using a .csv file containing creature
-    attributes as described in the documentation for this project.
+    '''Creates a row in a CreatureDB object using a .csv file containing 
+    creature attributes as described in the documentation for this project.
     
     :param db_conn: an open Connection object to a CreatureDB
     :param file_name: the name of the .csv file containing the creature data
@@ -56,10 +55,10 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
     # clean up
     creature_file.close()
 
+
 def create_db_entry_from_link(db_conn, link):
-    '''
-    Attempts to create a row in a CreatureDB object using a link to a Creature 
-    page on d20pfsrd.com
+    '''Attempts to create a row in a CreatureDB object using a link to a 
+    Creature page on d20pfsrd.com
     
     :param db_conn: an open Connection object to a CreatureDB
     :param link: string containing link to non-3rd party creature on d20pfsrd
@@ -86,8 +85,8 @@ def create_db_entry_from_link(db_conn, link):
     
 
 def get_creature_links(page):
-    '''
-    Obtains the list of links to all non-3rd party creatures on the given page
+    '''Obtains the list of links to all non-3rd party creatures on the given 
+    page
     
     :param page: string containing complete link to Bestiary page on d20pfsrd
     :returns: the list of links to all non-3rd party creatures on the given page
@@ -100,14 +99,14 @@ def get_creature_links(page):
     creature_links = []
     for element in elements:
         link = element.get('href')
-        if link != None and\
-           "monster-listings/" in link and not is_problem_link(link):           
+        if (link != None and
+                "monster-listings/" in link and not is_problem_link(link)):           
             creature_links.append(link)
     return creature_links
-    
+
+
 def get_html_indeces():
-    '''
-    Obtains the list of links to pages of creatures clustered by 
+    '''Obtains the list of links to pages of creatures clustered by 
     Challenge Rating (CR)
     '''
     index_file = open('INDEX.txt', 'r')
@@ -115,10 +114,10 @@ def get_html_indeces():
     for i, item in enumerate(creature_indeces):
         creature_indeces[i] = creature_indeces[i].rstrip()
     return creature_indeces
-    
+
+
 def is_problem_link(link):
-    '''
-    Determines whether or not the provided link is a "problem" link. In this 
+    '''Determines whether or not the provided link is a "problem" link. In this 
     context, a "problem" link is defined as one that leads to a non-creature 
     entry or 3rd-party content.
     
@@ -134,12 +133,12 @@ def is_problem_link(link):
         if link[-1 * len(suffix):] == suffix:
             return True
     return False
-    
+
+
 def is_problem_page(root):
-    '''
-    Determines whether or not the provided web page is a "problem" page. In this 
-    context, a "problm" page is defined as one that does not contain a 3rd-party 
-    creature.
+    '''Determines whether or not the provided web page is a "problem" page. In 
+    this context, a "problm" page is defined as one that does not contain a 
+    3rd-party creature.
     
     :param root: the root HtmlElement node of a Bestiary page from d20pfsrd.com
     :returns: True if the page is a problem page, False otherwise
@@ -150,8 +149,8 @@ def is_problem_page(root):
     if footers:
         for footer in footers:
             footer_text = footer.text_content()
-            if u'\xc2' in footer_text or\
-               '(c)' in footer_text or 'Copyright' in footer_text:
+            if (u'\xc2' in footer_text or
+                   '(c)' in footer_text or 'Copyright' in footer_text):
                 for publisher in THIRD_PARTY_PUBLISHERS:
                     if publisher in footer_text:
                         return True
