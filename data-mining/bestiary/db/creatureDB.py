@@ -41,6 +41,9 @@ class CreatureDB(object):
         
         :param creature: a Creature object to be added to the database
         '''
+        if self.is_creature_in_db(creature):
+            return
+        # insert creature into database
         values = (creature.name,
                   creature.cr,
                   creature.ability_scores['Str'], 
@@ -80,3 +83,17 @@ class CreatureDB(object):
                          'ac', 'touch_ac', 'flatfooted_ac'])
         writer.writerows(data)
         csv_file.close()
+        
+    def is_creature_in_db(self, creature):
+        ''' Determines whether or not a datbase entry exists for a
+        given creature
+        
+        :returns True if entry exists, False otherwise
+        '''
+        # query database for creature
+        values = (creature.name, creature.cr)
+        query = '''select * from creatures where name=? and cr=?'''
+        cursor = self.connection.cursor()
+        cursor.execute(query, values)
+        
+        return cursor.fetchone() != None
