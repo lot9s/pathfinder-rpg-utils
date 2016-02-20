@@ -9,17 +9,12 @@ import sqlite3
 __all__ = ['CreatureDB']
 
 
-COLUMNS = ("id integer primary key autoincrement", 
-           "name varchar(45)", "CR real", 
-           "Str integer", "Dex integer", "Con integer", 
-           "Int integer", "Wis integer", "Cha integer", 
-           "ac integer", "touch_ac integer", "flatfooted_ac integer")
-
-
 class CreatureDB(object):
     '''Class for storing Creature objects in a SQLite database.'''
     
-    def __init__(self, name='creature.db'):
+    def __init__(self, name='creature.db', use_nominal_cr=False):
+        self.using_nominal_cr = use_nominal_cr
+        # initialize database
         self.connection = sqlite3.connect(name)
         self.connection.text_factory = str
         self._create_table()
@@ -30,9 +25,24 @@ class CreatureDB(object):
     
         :param name: a string value for the name of the table
         '''
-        # create table
+        # -- construct tuple of database columns
+        columns = ('id integer primary key autoincrement',
+                   'name varchar(45)')
+        # set type of CR column depending on flag
+        if self.using_nominal_cr:
+            columns = columns + ('CR varchar(10)',)
+        else:
+            columns = columns + ('CR real',)
+        # add the remaining database fields to column tuple
+        main_entry_columns = (
+            'Str integer', 'Dex integer', 'Con integer', 
+            'Int integer', 'Wis integer', 'Cha integer', 
+            'ac integer', 'touch_ac integer', 'flatfooted_ac integer'
+        )
+        columns = columns + main_entry_columns
+        # -- create table
         query = '''create table if not exists creatures 
-                   (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''' % COLUMNS
+                   (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''' % columns
         self.connection.execute(query)
         
     def add_creature(self, creature):
@@ -41,20 +51,28 @@ class CreatureDB(object):
         
         :param creature: a Creature object to be added to the database
         '''
+        # ignore duplicate creatures
         if self.is_creature_in_db(creature):
             return
+        # construct values tuple
+        values = (creature.name,)
+        if self.using_nominal_cr:
+            values = values + ('CR ' + creature.cr,)
+        else:
+            valus = values + (creature.cr,)
+        main_entry_values = (
+            creature.ability_scores['Str'], 
+            creature.ability_scores['Dex'], 
+            creature.ability_scores['Con'], 
+            creature.ability_scores['Int'], 
+            creature.ability_scores['Wis'], 
+            creature.ability_scores['Cha'],
+            creature.ac['AC'], 
+            creature.ac['touch'], 
+            creature.ac['flat-footed']
+        )
+        values = values + main_entry_values
         # insert creature into database
-        values = (creature.name,
-                  creature.cr,
-                  creature.ability_scores['Str'], 
-                  creature.ability_scores['Dex'], 
-                  creature.ability_scores['Con'], 
-                  creature.ability_scores['Int'], 
-                  creature.ability_scores['Wis'], 
-                  creature.ability_scores['Cha'],
-                  creature.ac['AC'], 
-                  creature.ac['touch'], 
-                  creature.ac['flat-footed'])
         query = '''insert into creatures 
                    (name,CR,Str,Dex,Con,Int,Wis,Cha,ac,touch_ac,flatfooted_ac) 
                    values (?,?,?,?,?,?,?,?,?,?,?)'''
@@ -90,6 +108,7 @@ class CreatureDB(object):
         
         :returns True if entry exists, False otherwise
         '''
+        # TODO: account for -C option
         # query database for creature
         values = (creature.name, creature.cr)
         query = '''select * from creatures where name=? and cr=?'''

@@ -1,6 +1,8 @@
 '''A module containing functions that allow one to scrape data from the Bestiary 
 pages of d20pfsrd.com and place it in a database'''
 
+import sys
+
 from lxml.html import parse
 from core.creature import Creature
 from db.creatureDB import CreatureDB
@@ -82,7 +84,15 @@ def create_db_entry_from_link(db_conn, link):
     # if not successful, exit cleanly
     else:
         raise Exception('ERROR: failed to download', link)
-    
+        
+        
+def display_help_message():
+    print '''\nUSAGE: python crawler.py [-Ch]
+          
+          -C    store nominal CR values in database instead of reals
+          -h    display help message
+          '''
+
 
 def get_creature_links(page):
     '''Obtains the list of links to all non-3rd party creatures on the given 
@@ -114,8 +124,8 @@ def get_html_indeces():
     for i, item in enumerate(creature_indeces):
         creature_indeces[i] = creature_indeces[i].rstrip()
     return creature_indeces
-
-
+    
+    
 def is_problem_link(link):
     '''Determines whether or not the provided link is a "problem" link. In this 
     context, a "problem" link is defined as one that leads to a non-creature 
@@ -170,8 +180,25 @@ def is_problem_page(root):
 # The resulting database will be exported in both .db (SQLite 3) and 
 # .csv formats.
 if __name__ == '__main__':
+    # default settings
+    db_name = 'creature.db'
+    cr_flag = False
+    
+    # handle command line arguments
+    for arg in sys.argv:
+        # ignore sys.argv[0]
+        if arg == __file__:
+            continue
+        if arg == '-C':
+            cr_flag = True
+        # display help message
+        if arg == '-h':
+            display_help_message()
+            db_connection.commit_and_close()
+            quit()
+    
     # open connection to sqlite3 database
-    db_connection = CreatureDB()
+    db_connection = CreatureDB(db_name, cr_flag)
     
     # add entries to creature database via links to pages on d20pfsrd.com
     try:
