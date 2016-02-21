@@ -18,14 +18,13 @@ class CreatureDB(object):
         self.connection = sqlite3.connect(name)
         self.connection.text_factory = str
         self._create_table()
-        
-    def _create_table(self):
-        '''Creates a SQLite table with the given name for storing 
-        Creature objects if it does not already exist
     
-        :param name: a string value for the name of the table
+    def _construct_table_columns(self):
+        '''Constructs a tuple that defines the columns in 
+        the "creatures" table
+        
+        :returns tuple that defines the columns in "creatures" table
         '''
-        # -- construct tuple of database columns
         columns = ('id integer primary key autoincrement',
                    'name varchar(45)')
         # set type of CR column depending on flag
@@ -40,26 +39,21 @@ class CreatureDB(object):
             'ac integer', 'touch_ac integer', 'flatfooted_ac integer'
         )
         columns = columns + main_entry_columns
-        # -- create table
-        query = '''create table if not exists creatures 
-                   (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''' % columns
-        self.connection.execute(query)
+        return columns
+    
+    def _construct_table_insert_values(self, creature):
+        '''Constructs a tuple of Creature values for insertion into
+        the "creatures" table
         
-    def add_creature(self, creature):
-        '''Adds a Creature object as a row in the appropriate table 
-        of the SQLite database
-        
-        :param creature: a Creature object to be added to the database
+        :returns tuple of values for insertion into "creatures" table
         '''
-        # ignore duplicate creatures
-        if self.is_creature_in_db(creature):
-            return
-        # construct values tuple
         values = (creature.name,)
+        # set value of CR column depending on flag
         if self.using_nominal_cr:
             values = values + ('CR ' + creature.cr,)
         else:
             valus = values + (creature.cr,)
+        # add the remaining database fields to values tuple
         main_entry_values = (
             creature.ability_scores['Str'], 
             creature.ability_scores['Dex'], 
@@ -72,7 +66,31 @@ class CreatureDB(object):
             creature.ac['flat-footed']
         )
         values = values + main_entry_values
+        return values
+    
+    def _create_table(self):
+        '''Creates a SQLite table with the given name for storing 
+        Creature objects if it does not already exist
+    
+        :param name: a string value for the name of the table
+        '''
+        # create table
+        columns = self._construct_table_columns()
+        query = '''create table if not exists creatures 
+                   (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''' % columns
+        self.connection.execute(query)
+    
+    def add_creature(self, creature):
+        '''Adds a Creature object as a row in the appropriate table 
+        of the SQLite database
+        
+        :param creature: a Creature object to be added to the database
+        '''
+        # ignore duplicate creatures
+        if self.is_creature_in_db(creature):
+            return
         # insert creature into database
+        values = self._construct_table_insert_values(creature)
         query = '''insert into creatures 
                    (name,CR,Str,Dex,Con,Int,Wis,Cha,ac,touch_ac,flatfooted_ac) 
                    values (?,?,?,?,?,?,?,?,?,?,?)'''
@@ -108,9 +126,12 @@ class CreatureDB(object):
         
         :returns True if entry exists, False otherwise
         '''
-        # TODO: account for -C option
+        # set value of CR column depending on flag
+        creature_cr = creature.cr
+        if self.using_nominal_cr:
+            creature_cr = 'CR ' + creature.cr
         # query database for creature
-        values = (creature.name, creature.cr)
+        values = (creature.name, creature_cr)
         query = '''select * from creatures where name=? and cr=?'''
         cursor = self.connection.cursor()
         cursor.execute(query, values)
