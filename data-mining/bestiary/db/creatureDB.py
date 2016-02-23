@@ -34,9 +34,10 @@ class CreatureDB(object):
             columns = columns + ('CR real',)
         # add the remaining database fields to column tuple
         main_entry_columns = (
+            'hp integer',
+            'ac integer', 'touch_ac integer', 'flatfooted_ac integer',
             'Str integer', 'Dex integer', 'Con integer', 
-            'Int integer', 'Wis integer', 'Cha integer', 
-            'ac integer', 'touch_ac integer', 'flatfooted_ac integer'
+            'Int integer', 'Wis integer', 'Cha integer'
         )
         columns = columns + main_entry_columns
         return columns
@@ -52,18 +53,19 @@ class CreatureDB(object):
         if self.using_nominal_cr:
             values = values + ('CR ' + creature.cr,)
         else:
-            valus = values + (creature.cr,)
+            values = values + (creature.cr,)
         # add the remaining database fields to values tuple
         main_entry_values = (
+            creature.hp,
+            creature.ac['AC'], 
+            creature.ac['touch'], 
+            creature.ac['flat-footed'],
             creature.ability_scores['Str'], 
             creature.ability_scores['Dex'], 
             creature.ability_scores['Con'], 
             creature.ability_scores['Int'], 
             creature.ability_scores['Wis'], 
-            creature.ability_scores['Cha'],
-            creature.ac['AC'], 
-            creature.ac['touch'], 
-            creature.ac['flat-footed']
+            creature.ability_scores['Cha']
         )
         values = values + main_entry_values
         return values
@@ -77,7 +79,7 @@ class CreatureDB(object):
         # create table
         columns = self._construct_table_columns()
         query = '''create table if not exists creatures 
-                   (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''' % columns
+                   (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''' % columns
         self.connection.execute(query)
     
     def add_creature(self, creature):
@@ -92,8 +94,12 @@ class CreatureDB(object):
         # insert creature into database
         values = self._construct_table_insert_values(creature)
         query = '''insert into creatures 
-                   (name,CR,Str,Dex,Con,Int,Wis,Cha,ac,touch_ac,flatfooted_ac) 
-                   values (?,?,?,?,?,?,?,?,?,?,?)'''
+                   (
+                       name,CR,
+                       hp,ac,touch_ac,flatfooted_ac,
+                       Str,Dex,Con,Int,Wis,Cha
+                   ) 
+                   values (?,?,?,?,?,?,?,?,?,?,?,?)'''
         self.connection.execute(query, values)
     
     def commit_and_close(self):
@@ -113,10 +119,12 @@ class CreatureDB(object):
         # write data to output file
         csv_file = open(file_name, 'w')
         writer = csv.writer(csv_file)
-        writer.writerow(['id', 
-                         'name', 'CR',
-                         'Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha',
-                         'ac', 'touch_ac', 'flatfooted_ac'])
+        writer.writerow([
+            'id', 
+            'name', 'CR',
+            'hp', 'ac', 'touch_ac', 'flatfooted_ac',
+            'Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'
+        ])
         writer.writerows(data)
         csv_file.close()
         

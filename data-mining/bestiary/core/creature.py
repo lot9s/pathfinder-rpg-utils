@@ -11,7 +11,8 @@ __all__ = ['Creature']
 
 # --- Constants ---
 ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
-ATTRIBUTES = ['DEFENSE', 'AC', 'touch', 'flat-footed', 'STATISTICS', 'Base']
+ATTRIBUTES = ['DEFENSE', 'hp', 'AC', 'touch', 'flat-footed', 
+              'STATISTICS', 'Base']
 
 
 # --- Functions ---
@@ -47,14 +48,15 @@ def format_creature_entry(entry):
     :returns: a formatted copy of the Creature entry
     '''
     _entry = entry.encode('ascii', 'ignore') # remove unicode chars
-    _entry = _entry.replace("*", "")      
-    _entry = _entry.replace(",", ", ")    
-    _entry = _entry.replace("flatfooted", "flat-footed")
+    _entry = _entry.replace('*', '')      
+    _entry = _entry.replace(',', ', ')
+    _entry = _entry.replace('(', ' (')    
+    _entry = _entry.replace('flatfooted', 'flat-footed')
     # add spaces where needed
     _entry = check_text_for_spaces(_entry, ATTRIBUTES)
     _entry = check_text_for_spaces(_entry, ABILITIES, _entry.find('STATISTICS'))
     # replace all occurrences of white space with a single ' '
-    _entry = re.sub(r"\s+", ' ', _entry)
+    _entry = re.sub(r'\s+', ' ', _entry)
     return _entry
 
 
@@ -141,27 +143,37 @@ class Creature(object):
         self.name = ''
         self.cr = '0'
         self.mr = '0'
-        self.ability_scores = {'Str': '0', 'Dex': '0', 'Con': '0', 
-                               'Int': '0', 'Wis': '0', 'Cha': '0'}
+        # defenses
+        self.hp = '0'
         self.ac = {'AC': '0', 'touch': '0', 'flat-footed': '0'}
+        # statistics
+        self.ability_scores = {
+            'Str': '0', 'Dex': '0', 'Con': '0', 
+            'Int': '0', 'Wis': '0', 'Cha': '0'
+        }
         
     def __repr__(self):
-        values = [self.cr, self.name, '\n',
-                  str(self.ability_scores), '\n', 
-                  str(self.ac)]
+        values = [
+            self.cr, self.name, '\n',
+            self.hp, str(self.ac), '\n',
+            str(self.ability_scores)
+        ]
         return ' '.join(values)
     
     def __str__(self):
-        values = [self.cr, self.name, '\n',
-                  'Str', self.ability_scores['Str'],
-                  'Dex', self.ability_scores['Dex'],
-                  'Con', self.ability_scores['Con'],
-                  'Int', self.ability_scores['Int'],
-                  'Wis', self.ability_scores['Wis'],
-                  'Cha', self.ability_scores['Cha'], '\n',
-                  'AC', self.ac['AC'],
-                  'touch', self.ac['touch'],
-                  'flat-footed', self.ac['flat-footed'], '\n\n']
+        values = [
+            self.cr, self.name, '\n',
+            'hp', self.hp,
+            'AC', self.ac['AC'],
+            'touch', self.ac['touch'],
+            'flat-footed', self.ac['flat-footed'], '\n',
+            'Str', self.ability_scores['Str'],
+            'Dex', self.ability_scores['Dex'],
+            'Con', self.ability_scores['Con'],
+            'Int', self.ability_scores['Int'],
+            'Wis', self.ability_scores['Wis'],
+            'Cha', self.ability_scores['Cha'], '\n\n'
+        ]
         return ' '.join(values)
         
     def _update_abilities(self, words):
@@ -173,8 +185,8 @@ class Creature(object):
         for key in self.ability_scores.keys():
             index = words.index(key, words.index("STATISTICS"))
             parsed_ability = words[index+1]
-            parsed_ability = parsed_ability.replace(",", "")
-            parsed_ability = parsed_ability.replace(";", "")
+            parsed_ability = parsed_ability.replace(',', '')
+            parsed_ability = parsed_ability.replace(';', '')
             if parsed_ability == '' or '-' in parsed_ability:
                 self.ability_scores[key] = '-1'
             else:
@@ -189,9 +201,20 @@ class Creature(object):
         for key in self.ac.keys():
             index = words.index(key, words.index("AC"))
             parsed_ac = words[index+1]
-            parsed_ac = parsed_ac.replace(",", "")
-            parsed_ac = parsed_ac.replace(";", "")
+            parsed_ac = parsed_ac.replace(',', '')
+            parsed_ac = parsed_ac.replace(';', '')
             self.ac[key] = parsed_ac
+    
+    def _update_hp(self, words):
+        ''' Updates the Creature's hit point values using the
+        Creature's entry on d20pfsrd.com split into individual words
+        
+        :param words: text of d20pfsrd bestiary page as list of words
+        '''
+        index = words.index('hp', words.index('DEFENSE'))
+        parsed_hp = words[index+1]
+        parsed_hp = parsed_hp.strip()
+        self.hp = parsed_hp
         
     def _update_entry_values(self, root):
         '''Updates the values for this Creature that are normally found 
@@ -211,6 +234,7 @@ class Creature(object):
         content_words = content_text.split(' ')
         # update all Creature values
         self._update_abilities(content_words)
+        self._update_hp(content_words)
         self._update_ac(content_words)
     
     def _update_header_values(self, root):
@@ -228,7 +252,7 @@ class Creature(object):
         info_text = info_element[0].text_content()
         info_text = info_text.strip()
         # replace all occurrences of white space with a single ' '
-        info_text = re.sub(r"\s+", ' ', info_text)
+        info_text = re.sub(r'\s+', ' ', info_text)
         # get creature's name and CR
         creature_name = info_text[:info_text.index('CR')-1]
         creature_cr = info_text[info_text.index('CR'):]
@@ -268,12 +292,13 @@ class Creature(object):
         '''
         self.cr = attr_list[0]
         self.name = attr_list[1]
-        self.ability_scores['Str'] = attr_list[2]
-        self.ability_scores['Dex'] = attr_list[3]
-        self.ability_scores['Con'] = attr_list[4]
-        self.ability_scores['Int'] = attr_list[5]
-        self.ability_scores['Wis'] = attr_list[6]
-        self.ability_scores['Cha'] = attr_list[7]
-        self.ac['AC'] = attr_list[8]
-        self.ac['touch'] = attr_list[9]
-        self.ac['flat-footed'] = attr_list[10]
+        self.hp = attr_list[2]
+        self.ac['AC'] = attr_list[3]
+        self.ac['touch'] = attr_list[4]
+        self.ac['flat-footed'] = attr_list[5]
+        self.ability_scores['Str'] = attr_list[6]
+        self.ability_scores['Dex'] = attr_list[7]
+        self.ability_scores['Con'] = attr_list[8]
+        self.ability_scores['Int'] = attr_list[9]
+        self.ability_scores['Wis'] = attr_list[10]
+        self.ability_scores['Cha'] = attr_list[11]

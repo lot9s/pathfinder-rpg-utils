@@ -19,7 +19,7 @@ MAX_ATTEMPTS = 3
 
 PROBLEM_LINKS = ['/corgi-dire', '/darkwood-cobra', '/dlurgraven', 
                  '/formian-hive-queen', '/gashadokuru', '/minotaur-elder', 
-                 '/mithral-cobra', '/mold-russet', '/sinspawn-hub', 
+                 '/mithral-cobra', '/mold-russet', 'shaitan', '/sinspawn-hub', 
                  '/zombie-hill-giant', 'sites.google.com', 'templates', 'TOC-']
 
 PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', 
@@ -110,7 +110,7 @@ def get_creature_links(page):
     for element in elements:
         link = element.get('href')
         if (link != None and
-                "monster-listings/" in link and not is_problem_link(link)):           
+                'monster-listings/' in link and not is_problem_link(link)):
             creature_links.append(link)
     return creature_links
 
