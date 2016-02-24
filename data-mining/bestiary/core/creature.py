@@ -215,6 +215,7 @@ class Creature(object):
         parsed_hp = words[index+1]
         parsed_hp = parsed_hp.strip()
         self.hp = parsed_hp
+        #print words[index+2]
         
     def _update_entry_values(self, root):
         '''Updates the values for this Creature that are normally found 

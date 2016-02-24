@@ -109,7 +109,7 @@ def get_creature_links(page):
     creature_links = []
     for element in elements:
         link = element.get('href')
-        if (link != None and
+        if (link is not None and
                 'monster-listings/' in link and not is_problem_link(link)):
             creature_links.append(link)
     return creature_links

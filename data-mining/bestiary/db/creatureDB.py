@@ -144,4 +144,4 @@ class CreatureDB(object):
         cursor = self.connection.cursor()
         cursor.execute(query, values)
         
-        return cursor.fetchone() != None
+        return cursor.fetchone() is not None
