@@ -11,7 +11,7 @@ __all__ = ['Creature']
 
 # --- Constants ---
 ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
-ATTRIBUTES = ['DEFENSE', 'hp', 'AC', 'touch', 'flat-footed', 
+ATTRIBUTES = ['DEFENSE', 'hp', 'AC', 'touch', 'flat-footed', 'Fort',
               'STATISTICS', 'Base']
 
 
@@ -41,18 +41,21 @@ def check_text_for_spaces(text, keywords, start=0):
 
 
 def format_creature_entry(entry):
-    '''Returns copy of creature entry formatted such that it is easily 
+    '''Returns copy of Creature entry formatted such that it is easily 
     parsable
     
     :param entry: Creature entry scraped from d20pfsrd bestiary page
     :returns: a formatted copy of the Creature entry
     '''
-    _entry = entry.encode('ascii', 'ignore') # remove unicode chars
-    _entry = _entry.replace('*', '')      
-    _entry = _entry.replace(',', ', ')
-    _entry = _entry.replace('(', ' (')    
+    # handle unicode characters
+    _entry = entry.replace(u'\xe2', u'-')
+    _entry = _entry.encode('ascii', 'ignore')
+    # massage text in some necessary ways
+    _entry = _entry.replace('*', '')
     _entry = _entry.replace('flatfooted', 'flat-footed')
     # add spaces where needed
+    _entry = _entry.replace(',', ', ')
+    _entry = _entry.replace('(', ' (')
     _entry = check_text_for_spaces(_entry, ATTRIBUTES)
     _entry = check_text_for_spaces(_entry, ABILITIES, _entry.find('STATISTICS'))
     # replace all occurrences of white space with a single ' '
@@ -83,7 +86,7 @@ def format_creature_name(name):
 def get_cr_and_mr_from_text(text):
     '''
     If present within the given text, returns a tuple containing a 
-    creature's Challenge Rating (CR) and Mythic Rank (MR)
+    Creature's Challenge Rating (CR) and Mythic Rank (MR)
     
     It is expected that the given text will be of the form 'CR X/MR Y'
     
@@ -137,7 +140,7 @@ def insert_text(orig_text, index, insert_text):
 
 # --- Classes ---
 class Creature(object):
-    '''Class representing a creature from the Pathfinder RPG'''
+    '''Class representing a Creature from the Pathfinder RPG'''
     
     def __init__(self):
         self.name = ''
@@ -145,6 +148,7 @@ class Creature(object):
         self.mr = '0'
         # defenses
         self.hp = '0'
+        self.hd = '0'
         self.ac = {'AC': '0', 'touch': '0', 'flat-footed': '0'}
         # statistics
         self.ability_scores = {
@@ -155,7 +159,7 @@ class Creature(object):
     def __repr__(self):
         values = [
             self.cr, self.name, '\n',
-            self.hp, str(self.ac), '\n',
+            self.hp, self.hd, str(self.ac), '\n',
             str(self.ability_scores)
         ]
         return ' '.join(values)
@@ -163,7 +167,8 @@ class Creature(object):
     def __str__(self):
         values = [
             self.cr, self.name, '\n',
-            'hp', self.hp,
+            'hp', self.hp, 
+            'HD', self.hd,
             'AC', self.ac['AC'],
             'touch', self.ac['touch'],
             'flat-footed', self.ac['flat-footed'], '\n',
@@ -199,23 +204,41 @@ class Creature(object):
         :param words: text of d20pfsrd bestiary page as list of words
         '''
         for key in self.ac.keys():
-            index = words.index(key, words.index("AC"))
+            index = words.index(key, words.index('AC'))
             parsed_ac = words[index+1]
             parsed_ac = parsed_ac.replace(',', '')
             parsed_ac = parsed_ac.replace(';', '')
             self.ac[key] = parsed_ac
     
-    def _update_hp(self, words):
-        ''' Updates the Creature's hit point values using the
-        Creature's entry on d20pfsrd.com split into individual words
+    def _update_hp_and_hd(self, words):
+        ''' Updates the Creature's hit point and hit dice values 
+        using the Creature's entry on d20pfsrd.com split into 
+        individual words
         
         :param words: text of d20pfsrd bestiary page as list of words
         '''
+        # get the Creature's hp value
         index = words.index('hp', words.index('DEFENSE'))
-        parsed_hp = words[index+1]
+        index = index + 1  # want word after 'hp' in entry
+        parsed_hp = words[index]
         parsed_hp = parsed_hp.strip()
         self.hp = parsed_hp
-        #print words[index+2]
+        # get the Creature's Hit Dice (HD) value
+        index = index + 1  # want expression after hp value
+        parsed_hd = words[index]
+        # handle case where 'each' is after hp value
+        if 'each' in parsed_hd:
+            index = index + 1
+            parsed_hd = words[index]
+        parsed_hd = parsed_hd.replace(',', '')
+        parsed_hd = parsed_hd.replace(';', '')
+        # case 1: hit dice listed in form NdM
+        if 'd' in parsed_hd:
+            parsed_hd = parsed_hd[1 : parsed_hd.index('d')]
+        # case 2: hit diced listed in form N HD
+        else:
+            parsed_hd = parsed_hd[1:]
+        self.hd = parsed_hd
         
     def _update_entry_values(self, root):
         '''Updates the values for this Creature that are normally found 
@@ -226,16 +249,16 @@ class Creature(object):
         
         :param root: root element of an HtmlElement tree
         '''
-        # get the page's creature text
+        # get the page's Creature text
         content = root.cssselect('.sites-canvas-main')
         content_element = content[0]
         content_text = content_element.text_content()
-        # format creature text such that it is easily parsable
+        # format Creature text such that it is easily parsable
         content_text = format_creature_entry(content_text)
         content_words = content_text.split(' ')
         # update all Creature values
         self._update_abilities(content_words)
-        self._update_hp(content_words)
+        self._update_hp_and_hd(content_words)
         self._update_ac(content_words)
     
     def _update_header_values(self, root):
@@ -247,19 +270,19 @@ class Creature(object):
         
         :param root: root element of an HtmlElement tree
         '''
-        # get html element with creature's name and CR
+        # get html element with Creature's name and CR
         info_element = root.cssselect('td.sites-layout-tile tr')
-        # get separate strings for the creature's name and CR
+        # get separate strings for the Creature's name and CR
         info_text = info_element[0].text_content()
         info_text = info_text.strip()
         # replace all occurrences of white space with a single ' '
         info_text = re.sub(r'\s+', ' ', info_text)
-        # get creature's name and CR
+        # get Creature's name and CR
         creature_name = info_text[:info_text.index('CR')-1]
         creature_cr = info_text[info_text.index('CR'):]
-        # update creature after formatting
+        # update Creature after formatting
         self.name = format_creature_name(creature_name)
-        # update creature CR and MR after extraction from text
+        # update Creature CR and MR after extraction from text
         cr_mr_tuple = get_cr_and_mr_from_text(creature_cr)
         self.cr = cr_mr_tuple[0]
         self.mr = cr_mr_tuple[1]
@@ -283,10 +306,10 @@ class Creature(object):
             self._update_header_values(root)
             self._update_entry_values(root)
         except IOError:
-            print 'ERROR: failed to update creature data'
+            print 'ERROR: failed to update Creature data'
 
     def update_via_list(self, attr_list):
-        '''Updates the Creature object using a list of creature 
+        '''Updates the Creature object using a list of  reature 
         attributes taken from a .csv file
         
         :param attr_list: list of attributes (strings) from .csv file

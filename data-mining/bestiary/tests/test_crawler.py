@@ -19,7 +19,7 @@ class TestCreature(unittest.TestCase):
         '''Executes a single, specific sanity check for 
         Creature.update_name_and_cr(...)
         
-        :param link: string containing link to non-3rd party creature
+        :param link: string containing link to non-3rd party Creature
         :param expected_abilities: dictionary of expected ability scores
         '''
         # get root of an HtmlElement tree representing provided link
@@ -28,7 +28,6 @@ class TestCreature(unittest.TestCase):
         # create Creature from root
         creature = Creature()
         creature.update_via_htmlelement(root)
-        print creature
         # check if the Creature's attributes match expectations
         for key in creature.ability_scores.keys():
             self.assertEqual(creature.ability_scores[key],
@@ -38,9 +37,9 @@ class TestCreature(unittest.TestCase):
         '''Executes a single, specific sanity check for 
         Creature.update_header_values(...)
         
-        :param link: string containing link to non-3rd party creature
-        :param expected_name: the name of the creature we expect to see
-        :param expected_cr: the cr of the creature we expect to see
+        :param link: string containing link to non-3rd party Creature
+        :param expected_name: the name of the Creature we expect to see
+        :param expected_cr: the cr of the Creature we expect to see
         '''
         # get root of an HtmlElement tree representing provided link
         parsed_html = parse(link)
@@ -61,6 +60,7 @@ class TestCreature(unittest.TestCase):
             self.LINK_PREFIX + 'animals/herd-animals/camel',
             {'Str': '18', 'Dex': '16', 'Con': '14', 
              'Int': '2', 'Wis': '11', 'Cha': '4'})
+        #problem - does not have an INT value
         self._test_update_abilities(
             self.LINK_PREFIX + 'oozes/amoeba-giant',
             {'Str': '12', 'Dex': '1', 'Con': '16', 
@@ -70,15 +70,15 @@ class TestCreature(unittest.TestCase):
         '''Executes a small number of sanity checks for 
         Creature._update_name_and_cr(...)
         '''
-        # problem - standard creature entry
+        # problem - standard Creature entry
         self._test_update_header_values(
             self.LINK_PREFIX + 'aberrations/akata', 'Akata', '1')
-        # problem - creature entry uses non-standard mix of 
+        # problem - Creature entry uses non-standard mix of 
         #               html elements for displaying name and CR
         self._test_update_header_values(
             self.LINK_PREFIX + 'outsiders/demodand/demodand-tarry',
             'Tarry Demodand', '13')
-    
+
 
 if __name__ == '__main__':
     unittest.main()

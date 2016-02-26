@@ -2,6 +2,7 @@
 pages of d20pfsrd.com and place it in a database'''
 
 import sys
+import traceback
 
 from lxml.html import parse
 from core.creature import Creature
@@ -45,7 +46,7 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
     creature_file = open(file_name, 'r')
     for next_line in creature_file:
         # skip first line
-        if next_line[:3] == 'CR,':
+        if next_line.startswith('CR,'):
             continue
         # create Creature object
         creature = Creature()
@@ -87,6 +88,8 @@ def create_db_entry_from_link(db_conn, link):
         
         
 def display_help_message():
+    '''Displays help message corresponding to -h command line
+    argument'''
     print '''\nUSAGE: python crawler.py [-Ch]
           
           -C    store nominal CR values in database instead of reals
@@ -214,7 +217,7 @@ if __name__ == '__main__':
         for line in special_index_file:
             create_db_entry_from_link(db_connection, line.strip())
     except Exception as e:
-        print e.args[0]
+        traceback.print_exc()
     
     # add entries to creature database via .csv file
     create_db_entries_from_csv(db_connection)
