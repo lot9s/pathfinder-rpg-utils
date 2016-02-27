@@ -18,10 +18,11 @@ __all__ = ['create_db_entries_from_csv', 'create_db_entry_from_link',
 # the maximum number of retries allowed when attempting to download a web page
 MAX_ATTEMPTS = 3
 
-PROBLEM_LINKS = ['/corgi-dire', '/darkwood-cobra', '/dlurgraven', 
-                 '/formian-hive-queen', '/gashadokuru', '/minotaur-elder', 
-                 '/mithral-cobra', '/mold-russet', 'shaitan', '/sinspawn-hub', 
-                 '/zombie-hill-giant', 'sites.google.com', 'templates', 'TOC-']
+PROBLEM_LINKS = ['/corgi-dire', 'chupacabra-giant-winged', '/darkwood-cobra', 
+                 '/dlurgraven', '/formian-hive-queen', '/gashadokuru', 
+                 '/minotaur-elder', '/mithral-cobra', '/mold-russet', 'shaitan', 
+                 '/sinspawn-hub', '/zombie-hill-giant', 'sites.google.com', 
+                 'templates', 'TOC-']
 
 PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', 
                     '/rakshasa']
@@ -74,6 +75,7 @@ def create_db_entry_from_link(db_conn, link):
             if not is_problem_page(root):
                 creature = Creature()
                 creature.update_via_htmlelement(root)
+                print creature
                 # create table for CR of this creature if none exists
                 db_conn.add_creature(creature)
         # if I/O exception raised, try again

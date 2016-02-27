@@ -1,3 +1,4 @@
-CR,name,hp,AC,touch,flat-footed,Str,Dex,Con,Int,Wis,Cha
-7,Shaitan,85,20,10,19,20,13,19,14,14,15
-9,Minotaur Elder,114,22,9,22,24,10,19,9,16,10
+CR,name,hp,HD,AC,touch,flat-footed,Str,Dex,Con,Int,Wis,Cha
+5,Giant Winged Chupacabra,51,6,15,13,12,17,15,16,3,15,16
+7,Shaitan,85,9,20,10,19,20,13,19,14,14,15
+9,Minotaur Elder,114,12,22,9,22,24,10,19,9,16,10

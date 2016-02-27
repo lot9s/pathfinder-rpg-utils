@@ -168,7 +168,7 @@ class Creature(object):
         values = [
             self.cr, self.name, '\n',
             'hp', self.hp, 
-            'HD', self.hd,
+            'HD', self.hd, '\n',
             'AC', self.ac['AC'],
             'touch', self.ac['touch'],
             'flat-footed', self.ac['flat-footed'], '\n',
@@ -317,12 +317,13 @@ class Creature(object):
         self.cr = attr_list[0]
         self.name = attr_list[1]
         self.hp = attr_list[2]
-        self.ac['AC'] = attr_list[3]
-        self.ac['touch'] = attr_list[4]
-        self.ac['flat-footed'] = attr_list[5]
-        self.ability_scores['Str'] = attr_list[6]
-        self.ability_scores['Dex'] = attr_list[7]
-        self.ability_scores['Con'] = attr_list[8]
-        self.ability_scores['Int'] = attr_list[9]
-        self.ability_scores['Wis'] = attr_list[10]
-        self.ability_scores['Cha'] = attr_list[11]
+        self.hd = attr_list[3]
+        self.ac['AC'] = attr_list[4]
+        self.ac['touch'] = attr_list[5]
+        self.ac['flat-footed'] = attr_list[6]
+        self.ability_scores['Str'] = attr_list[7]
+        self.ability_scores['Dex'] = attr_list[8]
+        self.ability_scores['Con'] = attr_list[9]
+        self.ability_scores['Int'] = attr_list[10]
+        self.ability_scores['Wis'] = attr_list[11]
+        self.ability_scores['Cha'] = attr_list[12]
