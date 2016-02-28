@@ -8,7 +8,7 @@ import traceback
 from lxml.html import parse
 from core.creature import Creature
 from core.builders.creature.d20pfsrd import D20PFSRDCreatureBuilder
-from core.builders.creature.dict import DictCreatureBuilder
+from core.builders.creature.dict import build as dict_build
 from db.creatureDB import CreatureDB
 
 
@@ -52,7 +52,6 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
     :param db_conn: an open Connection object to a CreatureDB
     :param file_name: the name of the .csv file containing the creature data
     '''
-    builder = DictCreatureBuilder()
     # get creature data from .csv file
     creature_keys = []
     creature_file = open(file_name, 'r')
@@ -64,7 +63,7 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
             continue
         # create Creature object
         creature_dict = dict(zip(creature_keys, creature_features))
-        creature = builder.build(creature_dict)
+        creature = dict_build(creature_dict)
         print creature
         # add Creature object to database
         db_conn.add_creature(creature)
