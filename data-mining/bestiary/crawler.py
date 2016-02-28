@@ -7,7 +7,7 @@ import traceback
 
 from lxml.html import parse
 from core.creature import Creature
-from core.builders.creature.d20pfsrd import D20PFSRDCreatureBuilder
+from core.builders.creature.d20pfsrd import build as d20_build
 from core.builders.creature.dict import build as dict_build
 from db.creatureDB import CreatureDB
 
@@ -79,14 +79,13 @@ def create_db_entry_from_link(db_conn, link):
     :param db_conn: an open Connection object to a CreatureDB
     :param link: string containing link to non-3rd party creature on d20pfsrd
     '''
-    builder = D20PFSRDCreatureBuilder()
     for i in range(MAX_ATTEMPTS):
         try:
             html_tree = parse(link)
             root = html_tree.getroot()
             # if the link is acceptable, create a creature entry in our database
             if not is_problem_page(root):
-                creature = builder.build(root)
+                creature = d20_build(root)
                 print 'Creature', creature
                 # create table for CR of this creature if none exists
                 db_conn.add_creature(creature)
