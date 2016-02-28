@@ -1,4 +1,4 @@
-'''A module containing a class for building Creature objects from 
+'''A module containing a function for building Creature objects from 
 root HtmlElement objects related to d20pfsrd.com Bestiary pages'''
 
 
