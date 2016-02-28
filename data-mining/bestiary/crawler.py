@@ -6,7 +6,7 @@ import traceback
 
 from lxml.html import parse
 from core.creature import Creature
-from core.builders.creature.list import ListCreatureBuilder
+from core.builders.creature.dict import DictCreatureBuilder
 from db.creatureDB import CreatureDB
 
 
@@ -50,16 +50,19 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
     :param db_conn: an open Connection object to a CreatureDB
     :param file_name: the name of the .csv file containing the creature data
     '''
+    builder = DictCreatureBuilder()
     # get creature data from .csv file
-    builder = ListCreatureBuilder()
+    creature_keys = []
     creature_file = open(file_name, 'r')
     for next_line in creature_file:
+        creature_features = next_line.strip().split(',')
         # skip first line
         if next_line.startswith('CR,'):
+            creature_keys = creature_features
             continue
         # create Creature object
-        creature_attributes = next_line.strip().split(',')
-        creature = builder.build(creature_attributes)
+        creature_dict = dict(zip(creature_keys, creature_features))
+        creature = builder.build(creature_dict)
         print creature
         # add Creature object to database
         db_conn.add_creature(creature)
@@ -213,21 +216,21 @@ if __name__ == '__main__':
     # open connection to sqlite3 database
     db_connection = CreatureDB(db_name, cr_flag)
     
-     add entries to creature database via links to pages on d20pfsrd.com
-    try:
+    # add entries to creature database via links to pages on d20pfsrd.com
+    #try:
         # create a creature database entry for each link reachable by our index
-        indeces = get_html_indeces()
-        for index in indeces:
-            links = get_creature_links(index)
+    #    indeces = get_html_indeces()
+    #    for index in indeces:
+    #        links = get_creature_links(index)
             # iterate over each link of the current index
-            for creature_link in links:
-                create_db_entry_from_link(db_connection, creature_link)
+    #        for creature_link in links:
+    #            create_db_entry_from_link(db_connection, creature_link)
         # create a creature database entry for each link in the special index
-        special_index_file = open('INDEX_SPECIAL.txt', 'r')
-        for line in special_index_file:
-            create_db_entry_from_link(db_connection, line.strip())
-    except Exception as e:
-        traceback.print_exc()
+    #    special_index_file = open('INDEX_SPECIAL.txt', 'r')
+    #    for line in special_index_file:
+    #        create_db_entry_from_link(db_connection, line.strip())
+    #except Exception as e:
+    #    traceback.print_exc()
     
     # add entries to creature database via .csv file
     create_db_entries_from_csv(db_connection)
