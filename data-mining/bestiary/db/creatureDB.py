@@ -36,6 +36,7 @@ class CreatureDB(object):
         main_entry_columns = (
             'hp integer', 'HD integer',
             'ac integer', 'touch_ac integer', 'flatfooted_ac integer',
+            'Fort integer', 'Ref integer', 'Will integer',
             'Str integer', 'Dex integer', 'Con integer', 
             'Int integer', 'Wis integer', 'Cha integer'
         )
@@ -61,6 +62,9 @@ class CreatureDB(object):
             creature.ac['AC'], 
             creature.ac['touch'], 
             creature.ac['flat-footed'],
+            creature.saves['Fort'],
+            creature.saves['Ref'],
+            creature.saves['Will'],
             creature.ability_scores['Str'], 
             creature.ability_scores['Dex'], 
             creature.ability_scores['Con'], 
@@ -80,7 +84,13 @@ class CreatureDB(object):
         # create table
         columns = self._construct_table_columns()
         query = '''create table if not exists creatures 
-                   (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''' % columns
+                   (
+                       %s,%s,
+                       %s,%s,
+                       %s,%s,%s,
+                       %s,%s,%s,
+                       %s,%s,%s,%s,%s,%s,%s
+                   )''' % columns
         self.connection.execute(query)
     
     def add_creature(self, creature):
@@ -99,9 +109,17 @@ class CreatureDB(object):
                        name,CR,
                        hp,HD,
                        ac,touch_ac,flatfooted_ac,
+                       Fort, Ref, Will,
                        Str,Dex,Con,Int,Wis,Cha
                    ) 
-                   values (?,?,?,?,?,?,?,?,?,?,?,?,?)'''
+                   values 
+                   (
+                       ?,?,
+                       ?,?,
+                       ?,?,?,
+                       ?,?,?,
+                       ?,?,?,?,?,?
+                   )'''
         self.connection.execute(query, values)
     
     def commit_and_close(self):
@@ -126,6 +144,7 @@ class CreatureDB(object):
             'name', 'CR',
             'hp', 'HD', 
             'ac', 'touch_ac', 'flatfooted_ac',
+            'Fort', 'Ref', 'Will',
             'Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'
         ])
         writer.writerows(data)

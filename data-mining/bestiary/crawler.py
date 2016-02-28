@@ -6,6 +6,7 @@ import traceback
 
 from lxml.html import parse
 from core.creature import Creature
+from core.builders.creature.list import ListCreatureBuilder
 from db.creatureDB import CreatureDB
 
 
@@ -18,21 +19,27 @@ __all__ = ['create_db_entries_from_csv', 'create_db_entry_from_link',
 # the maximum number of retries allowed when attempting to download a web page
 MAX_ATTEMPTS = 3
 
-PROBLEM_LINKS = ['/corgi-dire', 'chupacabra-giant-winged', '/darkwood-cobra', 
-                 '/dlurgraven', '/formian-hive-queen', '/gashadokuru', 
-                 '/minotaur-elder', '/mithral-cobra', '/mold-russet', 'shaitan', 
-                 '/sinspawn-hub', '/zombie-hill-giant', 'sites.google.com', 
-                 'templates', 'TOC-']
+PROBLEM_LINKS = [
+    '/corgi-dire', 'chupacabra-giant-winged', '/darkwood-cobra', 
+    '/dlurgraven', '/formian-hive-queen', '/gashadokuru', 
+    '/minotaur-elder', '/mithral-cobra', '/mold-russet', 'platypus', 
+    'shaitan', '/sinspawn-hub', '/zombie-hill-giant', 
+    'sites.google.com', 'templates', 'TOC-'
+]
 
-PROBLEM_SUFFIXES = ['-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', 
-                    '/rakshasa']
+PROBLEM_SUFFIXES = [
+    '-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', 
+    '/rakshasa'
+]
 
-THIRD_PARTY_PUBLISHERS = ['4 Winds Fantasy Gaming', 'Alluria Publishing', 
-                          'Frog God Games', 'Green Ronin Publishing', 
-                          'Jon Brazer Enterprises', 'Mystic Eye Games', 
-                          'Necromancer Games', 'Open Design LLC', 
-                          'Paizo Fans United', 'Super Genius Games', 
-                          'The Way of the Samurai', 'Tricky Owlbear Publishing']
+THIRD_PARTY_PUBLISHERS = [
+    '4 Winds Fantasy Gaming', 'Alluria Publishing', 
+    'Frog God Games', 'Green Ronin Publishing', 
+    'Jon Brazer Enterprises', 'Mystic Eye Games', 
+    'Necromancer Games', 'Open Design LLC', 'Paizo Fans United', 
+    'Super Genius Games', 'The Way of the Samurai', 
+    'Tricky Owlbear Publishing'
+]
 
 
 # --- Functions ---
@@ -44,15 +51,16 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
     :param file_name: the name of the .csv file containing the creature data
     '''
     # get creature data from .csv file
+    builder = ListCreatureBuilder()
     creature_file = open(file_name, 'r')
     for next_line in creature_file:
         # skip first line
         if next_line.startswith('CR,'):
             continue
         # create Creature object
-        creature = Creature()
         creature_attributes = next_line.strip().split(',')
-        creature.update_via_list(creature_attributes)
+        creature = builder.build(creature_attributes)
+        print creature
         # add Creature object to database
         db_conn.add_creature(creature)
         
@@ -205,7 +213,7 @@ if __name__ == '__main__':
     # open connection to sqlite3 database
     db_connection = CreatureDB(db_name, cr_flag)
     
-    # add entries to creature database via links to pages on d20pfsrd.com
+     add entries to creature database via links to pages on d20pfsrd.com
     try:
         # create a creature database entry for each link reachable by our index
         indeces = get_html_indeces()

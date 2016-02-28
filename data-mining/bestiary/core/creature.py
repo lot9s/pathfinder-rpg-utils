@@ -11,8 +11,11 @@ __all__ = ['Creature']
 
 # --- Constants ---
 ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
-ATTRIBUTES = ['DEFENSE', 'hp', 'AC', 'touch', 'flat-footed', 'Fort',
-              'STATISTICS', 'Base']
+ATTRIBUTES = [
+    'DEFENSE', 'hp', 'AC', 'touch', 'flat-footed', 
+    'Fort', 'Ref', 'Will', 'Defensive', 'DR', 'Resist', 'Immune', 
+    'STATISTICS', 'Base'
+]
 
 
 # --- Functions ---
@@ -53,6 +56,7 @@ def format_creature_entry(entry):
     # massage text in some necessary ways
     _entry = _entry.replace('*', '')
     _entry = _entry.replace('flatfooted', 'flat-footed')
+    _entry = _entry.replace('Reflex', 'Ref')
     # add spaces where needed
     _entry = _entry.replace(',', ', ')
     _entry = _entry.replace('(', ' (')
@@ -150,6 +154,7 @@ class Creature(object):
         self.hp = '0'
         self.hd = '0'
         self.ac = {'AC': '0', 'touch': '0', 'flat-footed': '0'}
+        self.saves = {'Fort': '0', 'Ref': '0', 'Will': '0'}
         # statistics
         self.ability_scores = {
             'Str': '0', 'Dex': '0', 'Con': '0', 
@@ -159,7 +164,7 @@ class Creature(object):
     def __repr__(self):
         values = [
             self.cr, self.name, '\n',
-            self.hp, self.hd, str(self.ac), '\n',
+            self.hp, self.hd, str(self.saves), str(self.ac), '\n',
             str(self.ability_scores)
         ]
         return ' '.join(values)
@@ -172,6 +177,9 @@ class Creature(object):
             'AC', self.ac['AC'],
             'touch', self.ac['touch'],
             'flat-footed', self.ac['flat-footed'], '\n',
+            'Fort', self.saves['Fort'], 
+            'Ref', self.saves['Ref'],
+            'Will', self.saves['Will'], '\n',
             'Str', self.ability_scores['Str'],
             'Dex', self.ability_scores['Dex'],
             'Con', self.ability_scores['Con'],
@@ -204,12 +212,60 @@ class Creature(object):
         :param words: text of d20pfsrd bestiary page as list of words
         '''
         for key in self.ac.keys():
-            index = words.index(key, words.index('AC'))
+            index = words.index(key, words.index('DEFENSE'))
             parsed_ac = words[index+1]
             parsed_ac = parsed_ac.replace(',', '')
             parsed_ac = parsed_ac.replace(';', '')
             self.ac[key] = parsed_ac
     
+    def _update_entry_values(self, root):
+        '''Updates the values for this Creature that are normally found 
+        in the main section of a Monster entry
+        
+        This is done using data in root of HtmlElement tree 
+        corresponding to the Creature's page on d20pfsrd.com
+        
+        :param root: root element of an HtmlElement tree
+        '''
+        # get the page's Creature text
+        content = root.cssselect('.sites-canvas-main')
+        content_element = content[0]
+        content_text = content_element.text_content()
+        # format Creature text such that it is easily parsable
+        content_text = format_creature_entry(content_text)
+        content_words = content_text.split(' ')
+        # update all Creature values
+        self._update_abilities(content_words)
+        self._update_hp_and_hd(content_words)
+        self._update_ac(content_words)
+        self._update_saves(content_words)
+    
+    def _update_header_values(self, root):
+        '''Updates the values for this Creature that are normally 
+        found in the header section of a Monster entry: name, CR, MR
+        
+        This is done using data in root of HtmlElement tree 
+        corresponding to the Creature's page on d20pfsrd.com.
+        
+        :param root: root element of an HtmlElement tree
+        '''
+        # get html element with Creature's name and CR
+        info_element = root.cssselect('td.sites-layout-tile tr')
+        # get separate strings for the Creature's name and CR
+        info_text = info_element[0].text_content()
+        info_text = info_text.strip()
+        # replace all occurrences of white space with a single ' '
+        info_text = re.sub(r'\s+', ' ', info_text)
+        # get Creature's name and CR
+        creature_name = info_text[:info_text.index('CR')-1]
+        creature_cr = info_text[info_text.index('CR'):]
+        # update Creature after formatting
+        self.name = format_creature_name(creature_name)
+        # update Creature CR and MR after extraction from text
+        cr_mr_tuple = get_cr_and_mr_from_text(creature_cr)
+        self.cr = cr_mr_tuple[0]
+        self.mr = cr_mr_tuple[1]
+        
     def _update_hp_and_hd(self, words):
         ''' Updates the Creature's hit point and hit dice values 
         using the Creature's entry on d20pfsrd.com split into 
@@ -239,53 +295,21 @@ class Creature(object):
         else:
             parsed_hd = parsed_hd[1:]
         self.hd = parsed_hd
-        
-    def _update_entry_values(self, root):
-        '''Updates the values for this Creature that are normally found 
-        in the main section of a Monster entry
-        
-        This is done using data in root of HtmlElement tree 
-        corresponding to the Creature's page on d20pfsrd.com
-        
-        :param root: root element of an HtmlElement tree
-        '''
-        # get the page's Creature text
-        content = root.cssselect('.sites-canvas-main')
-        content_element = content[0]
-        content_text = content_element.text_content()
-        # format Creature text such that it is easily parsable
-        content_text = format_creature_entry(content_text)
-        content_words = content_text.split(' ')
-        # update all Creature values
-        self._update_abilities(content_words)
-        self._update_hp_and_hd(content_words)
-        self._update_ac(content_words)
     
-    def _update_header_values(self, root):
-        '''Updates the values for this Creature that are normally 
-        found in the header section of a Monster entry: name, CR, MR
+    def _update_saves(self, words):
+        '''Updates the Creature's saving throw values using the
+        Creature's entry on d20pfsrd.coms split into individual
+        words.
         
-        This is done using data in root of HtmlElement tree 
-        corresponding to the Creature's page on d20pfsrd.com.
-        
-        :param root: root element of an HtmlElement tree
+        :param words: text of d20pfsrd bestiary page as list of words
         '''
-        # get html element with Creature's name and CR
-        info_element = root.cssselect('td.sites-layout-tile tr')
-        # get separate strings for the Creature's name and CR
-        info_text = info_element[0].text_content()
-        info_text = info_text.strip()
-        # replace all occurrences of white space with a single ' '
-        info_text = re.sub(r'\s+', ' ', info_text)
-        # get Creature's name and CR
-        creature_name = info_text[:info_text.index('CR')-1]
-        creature_cr = info_text[info_text.index('CR'):]
-        # update Creature after formatting
-        self.name = format_creature_name(creature_name)
-        # update Creature CR and MR after extraction from text
-        cr_mr_tuple = get_cr_and_mr_from_text(creature_cr)
-        self.cr = cr_mr_tuple[0]
-        self.mr = cr_mr_tuple[1]
+        for key in self.saves.keys():
+            index = words.index(key, words.index('DEFENSE'))
+            parsed_save = words[index+1]
+            parsed_save = parsed_save.replace(',', '')
+            parsed_save = parsed_save.replace(';', '')
+            parsed_save = parsed_save.replace('+', '')
+            self.saves[key] = parsed_save
         
     def is_valid(self):
         '''Determines whether or not the Creature object has valid 
@@ -307,23 +331,3 @@ class Creature(object):
             self._update_entry_values(root)
         except IOError:
             print 'ERROR: failed to update Creature data'
-
-    def update_via_list(self, attr_list):
-        '''Updates the Creature object using a list of  reature 
-        attributes taken from a .csv file
-        
-        :param attr_list: list of attributes (strings) from .csv file
-        '''
-        self.cr = attr_list[0]
-        self.name = attr_list[1]
-        self.hp = attr_list[2]
-        self.hd = attr_list[3]
-        self.ac['AC'] = attr_list[4]
-        self.ac['touch'] = attr_list[5]
-        self.ac['flat-footed'] = attr_list[6]
-        self.ability_scores['Str'] = attr_list[7]
-        self.ability_scores['Dex'] = attr_list[8]
-        self.ability_scores['Con'] = attr_list[9]
-        self.ability_scores['Int'] = attr_list[10]
-        self.ability_scores['Wis'] = attr_list[11]
-        self.ability_scores['Cha'] = attr_list[12]
