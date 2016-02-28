@@ -5,13 +5,16 @@ dictionary of features'''
 from core.creature import Creature
 
 
+__all__ = ['DictCreatureBuilder']
+
+
 class DictCreatureBuilder:
     '''Class for building Creature objects from a dictionary of 
     features'''
     
     def build(self, dict_):
         '''Creates a Creature object from the given a dictionary of 
-        featurees
+        features
         
         :param dict_: dictionary of featurees
         :returns: a Creature object
