@@ -60,7 +60,8 @@ def _format_creature_entry(entry):
     _entry = _entry.replace(',', ', ')
     _entry = _entry.replace('(', ' (')
     _entry = _check_text_for_spaces(_entry, ATTRIBUTES)
-    _entry = _check_text_for_spaces(_entry, ABILITIES, _entry.find('STATISTICS'))
+    _entry = _check_text_for_spaces(_entry, ABILITIES, 
+                                    _entry.find('STATISTICS'))
     # replace all occurrences of white space with a single ' '
     _entry = re.sub(r'\s+', ' ', _entry)
     return _entry
@@ -85,16 +86,16 @@ def _format_creature_name(name):
     return new_name
 
 
-def _insert_text_into_text(orig_text, index, _insert_text_into_text):
+def _insert_text_into_text(orig_text, index, insert_text):
     '''Creates a new string by inserting one string into another at
     some specified index
     
     :param orig_text: the original string
     :param index: index of original string to insert text into
-    :param _insert_text_into_text: string that will be inserted into the original
+    :param insert_text: string that will be inserted into the original
     :returns the new string after the insertion
     '''
-    return "%s%s%s" % (orig_text[:index], _insert_text_into_text, orig_text[index:])
+    return "%s%s%s" % (orig_text[:index], insert_text, orig_text[index:])
 
 
 def _populate_ability_scores(words, creature):
