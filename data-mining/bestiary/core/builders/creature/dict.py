@@ -27,4 +27,5 @@ def build(dict_):
         creature.saves[key] = dict_[key]
     for key in creature.ability_scores.keys():
         creature.ability_scores[key] = dict_[key]
+    creature.bab = dict_['BAB']
     return creature

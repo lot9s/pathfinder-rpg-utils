@@ -34,12 +34,15 @@ class Creature(object):
             'Str': '0', 'Dex': '0', 'Con': '0', 
             'Int': '0', 'Wis': '0', 'Cha': '0'
         }
+        self.bab = '0'
+        self.cmb = '0'
+        self.cmd = '0'
         
     def __repr__(self):
         values = [
             self.cr, self.name, '\n',
-            self.hp, self.hd, str(self.saves), str(self.ac), '\n',
-            str(self.ability_scores)
+            self.hp, self.hd, str(self.ac), str(self.saves), '\n',
+            str(self.ability_scores), self.bab, self.cmb, self.cmd
         ]
         return ' '.join(values)
     
@@ -59,15 +62,9 @@ class Creature(object):
             'Con', self.ability_scores['Con'],
             'Int', self.ability_scores['Int'],
             'Wis', self.ability_scores['Wis'],
-            'Cha', self.ability_scores['Cha'], '\n\n'
+            'Cha', self.ability_scores['Cha'], '\n',
+            'BAB', self.bab,
+            'CMB', self.cmb,
+            'CMD', self.cmd, '\n\n'
         ]
         return ' '.join(values)
-        
-    def is_valid(self):
-        '''Determines whether or not the Creature object has valid 
-        attribute values
-        
-        :returns True if Creature object is valid, False otherwise
-        '''
-        # TODO: write this method
-        return False

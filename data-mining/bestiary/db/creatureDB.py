@@ -38,7 +38,8 @@ class CreatureDB(object):
             'ac integer', 'touch_ac integer', 'flatfooted_ac integer',
             'Fort integer', 'Ref integer', 'Will integer',
             'Str integer', 'Dex integer', 'Con integer', 
-            'Int integer', 'Wis integer', 'Cha integer'
+            'Int integer', 'Wis integer', 'Cha integer',
+            'BAB integer'
         )
         columns = columns + main_entry_columns
         return columns
@@ -70,7 +71,8 @@ class CreatureDB(object):
             creature.ability_scores['Con'], 
             creature.ability_scores['Int'], 
             creature.ability_scores['Wis'], 
-            creature.ability_scores['Cha']
+            creature.ability_scores['Cha'],
+            creature.bab
         )
         values = values + main_entry_values
         return values
@@ -89,7 +91,8 @@ class CreatureDB(object):
                        %s,%s,
                        %s,%s,%s,
                        %s,%s,%s,
-                       %s,%s,%s,%s,%s,%s,%s
+                       %s,%s,%s,%s,%s,%s,%s,
+                       %s
                    )''' % columns
         self.connection.execute(query)
     
@@ -110,7 +113,8 @@ class CreatureDB(object):
                        hp,HD,
                        ac,touch_ac,flatfooted_ac,
                        Fort, Ref, Will,
-                       Str,Dex,Con,Int,Wis,Cha
+                       Str,Dex,Con,Int,Wis,Cha,
+                       BAB
                    ) 
                    values 
                    (
@@ -118,7 +122,8 @@ class CreatureDB(object):
                        ?,?,
                        ?,?,?,
                        ?,?,?,
-                       ?,?,?,?,?,?
+                       ?,?,?,?,?,?,
+                       ?
                    )'''
         self.connection.execute(query, values)
     
@@ -145,7 +150,8 @@ class CreatureDB(object):
             'hp', 'HD', 
             'ac', 'touch_ac', 'flatfooted_ac',
             'Fort', 'Ref', 'Will',
-            'Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha'
+            'Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha',
+            'BAB'
         ])
         writer.writerows(data)
         csv_file.close()

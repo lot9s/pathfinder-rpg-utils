@@ -86,8 +86,7 @@ def create_db_entry_from_link(db_conn, link):
             # if the link is acceptable, create a creature entry in our database
             if not is_problem_page(root):
                 creature = d20_build(root)
-                print 'Creature', creature
-                # create table for CR of this creature if none exists
+                print creature
                 db_conn.add_creature(creature)
         # if I/O exception raised, try again
         except IOError:

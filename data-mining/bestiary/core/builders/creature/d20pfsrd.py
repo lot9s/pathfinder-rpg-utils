@@ -15,7 +15,7 @@ ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
 ATTRIBUTES = [
     'DEFENSE', 'hp', 'AC', 'touch', 'flat-footed', 
     'Fort', 'Ref', 'Will', 'Defensive', 'DR', 'Resist', 'Immune', 
-    'STATISTICS', 'Base'
+    'STATISTICS', 'Base', 'Atk', 'CMB', 'CMD', 'Feats'
 ]
 
 
@@ -132,6 +132,21 @@ def _populate_ac(words, creature):
         creature.ac[key] = parsed_ac
 
 
+def _populate_bab(words, creature):
+    '''Populates a Creature object's base attack bonus value using the
+    Creature's entry on d20pfsrd.com split into individual words
+    
+    :param words: text of d20pfsrd bestiary page as list of words
+    :param creature: Creature object to be populated
+    '''
+    index = words.index('Atk', words.index('STATISTICS'))
+    parsed_bab = words[index+1]
+    parsed_bab = parsed_bab.replace(',', '')
+    parsed_bab = parsed_bab.replace(';', '')
+    parsed_bab = parsed_bab.replace('+', '')
+    creature.bab = parsed_bab
+
+
 def _populate_cr_and_mr(text, creature):
     '''Populate's a Creature object's Challenge Rating (CR) and
     Mythic Rank (MR) values using text taken from the header of
@@ -219,6 +234,7 @@ def _populate_from_entry_values(root, creature):
     _populate_ac(content_words, creature)
     _populate_saves(content_words, creature)
     _populate_ability_scores(content_words, creature)
+    _populate_bab(content_words, creature)
 
 
 def _populate_hp_and_hd(words, creature):
