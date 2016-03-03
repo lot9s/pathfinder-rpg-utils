@@ -47,7 +47,7 @@ class CreatureDB(object):
         columns = columns + main_entry_columns
         return columns
     
-    def _construct_table_insert_values(self, creature):
+    def _construct_tuple_insert_values(self, creature):
         '''Constructs a tuple of Creature values for insertion into
         the "creatures" table
         
@@ -115,7 +115,7 @@ class CreatureDB(object):
         if self.is_creature_in_db(creature):
             return
         # insert creature into database
-        values = self._construct_table_insert_values(creature)
+        values = self._construct_tuple_insert_values(creature)
         query = '''insert into creatures 
                    (
                        name,CR,

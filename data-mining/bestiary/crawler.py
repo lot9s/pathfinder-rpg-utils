@@ -2,6 +2,7 @@
 the Bestiary pages of d20pfsrd.com and place it in a database'''
 
 
+import argparse
 import sys
 import traceback
 
@@ -12,9 +13,11 @@ from core.builders.creature.dict import build as dict_build
 from db.creatureDB import CreatureDB
 
 
-__all__ = ['create_db_entries_from_csv', 'create_db_entry_from_link', 
-           'get_creature_links', 'get_html_indeces', 'is_problem_link', 
-           'is_problem_page']
+__all__ = [
+    'create_db_entries_from_csv', 'create_db_entry_from_link', 
+    'get_creature_links', 'get_html_indeces', 'is_problem_link', 
+    'is_problem_page'
+]
 
 
 # --- Constants ---
@@ -97,19 +100,6 @@ def create_db_entry_from_link(db_conn, link):
     # if not successful, exit cleanly
     else:
         raise Exception('ERROR: failed to download', link)
-        
-        
-def display_help_message():
-    '''Displays help message corresponding to -h command line
-    argument'''
-    print '''\nUSAGE: python crawler.py [-Ch]
-            
-          -C    CR values stored as strings, not integers
-          -h    display help message
-          
-          --cr-range=<min>-<max>
-                sets the valid range of CR values from <min> to <max>
-          '''
 
 
 def get_creature_links(page):
@@ -203,26 +193,23 @@ if __name__ == '__main__':
     cr_range = [0.0, float('inf')]
     cr_flag = False
     
-    # handle command line arguments
-    for arg in sys.argv:
-        # ignore sys.argv[0]
-        if arg == __file__:
-            continue
-        # set 'using_nominal_cr' flag
-        if arg == '-C':
-            cr_flag = True
-        # display help message and quit
-        if arg == '-h':
-            display_help_message()
-            db_connection.commit_and_close()
-            quit()
-        # set valid CR range
-        if '--cr-range=' in arg:
-            values = arg[arg.index('=') + 1 :]
-            cr_range[0] = float(values[: values.index('-')])
-            cr_range[1] = float(values[values.index('-') + 1 :])
+    # create parser for command line arguments
+    parser = argparse.ArgumentParser(description='Build a creature database')
+    parser.add_argument('-C', action='store_true',
+                        help='store CR values as strings, not integers')
+    parser.add_argument('--cr-range', nargs=2,
+                        help='sets valid range of CR values')
+    args = vars(parser.parse_args())
     
-    # open connection to sqlite3 database
+    # handle command line arguments
+    for key in args:
+        if key == 'C':
+            cr_flag = args['C']
+        if key == 'cr_range':
+            cr_range[0] = float(args['cr_range'][0])
+            cr_range[1] = float(args['cr_range'][1])
+    
+    # create sqlite3 database
     db_connection = CreatureDB(db_name, cr_flag)
     db_connection.min_cr = cr_range[0]
     db_connection.max_cr = cr_range[1]
