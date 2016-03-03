@@ -13,6 +13,9 @@ class CreatureDB(object):
     '''Class for storing Creature objects in a SQLite database.'''
     
     def __init__(self, name='creature.db', use_nominal_cr=False):
+        self.min_cr = 0.0
+        self.max_cr = float('inf')
+        # set flags
         self.using_nominal_cr = use_nominal_cr
         # initialize database
         self.connection = sqlite3.connect(name)
@@ -39,7 +42,7 @@ class CreatureDB(object):
             'Fort integer', 'Ref integer', 'Will integer',
             'Str integer', 'Dex integer', 'Con integer', 
             'Int integer', 'Wis integer', 'Cha integer',
-            'BAB integer'
+            'BAB integer', 'CMB integer', 'CMD integer'
         )
         columns = columns + main_entry_columns
         return columns
@@ -72,7 +75,9 @@ class CreatureDB(object):
             creature.ability_scores['Int'], 
             creature.ability_scores['Wis'], 
             creature.ability_scores['Cha'],
-            creature.bab
+            creature.bab,
+            creature.cmb,
+            creature.cmd
         )
         values = values + main_entry_values
         return values
@@ -92,7 +97,7 @@ class CreatureDB(object):
                        %s,%s,%s,
                        %s,%s,%s,
                        %s,%s,%s,%s,%s,%s,%s,
-                       %s
+                       %s, %s, %s
                    )''' % columns
         self.connection.execute(query)
     
@@ -102,6 +107,10 @@ class CreatureDB(object):
         
         :param creature: a Creature object to be added to the database
         '''
+        # check that creature CR is within desired range
+        creature_cr = float(creature.cr)
+        if creature_cr < self.min_cr or creature_cr > self.max_cr:
+            return
         # ignore duplicate creatures
         if self.is_creature_in_db(creature):
             return
@@ -114,7 +123,7 @@ class CreatureDB(object):
                        ac,touch_ac,flatfooted_ac,
                        Fort, Ref, Will,
                        Str,Dex,Con,Int,Wis,Cha,
-                       BAB
+                       BAB,CMB,CMD
                    ) 
                    values 
                    (
@@ -123,7 +132,7 @@ class CreatureDB(object):
                        ?,?,?,
                        ?,?,?,
                        ?,?,?,?,?,?,
-                       ?
+                       ?,?,?
                    )'''
         self.connection.execute(query, values)
     
@@ -151,7 +160,7 @@ class CreatureDB(object):
             'ac', 'touch_ac', 'flatfooted_ac',
             'Fort', 'Ref', 'Will',
             'Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha',
-            'BAB'
+            'BAB', 'CMB', 'CMD'
         ])
         writer.writerows(data)
         csv_file.close()

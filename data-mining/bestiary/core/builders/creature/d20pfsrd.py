@@ -15,7 +15,7 @@ ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
 ATTRIBUTES = [
     'DEFENSE', 'hp', 'AC', 'touch', 'flat-footed', 
     'Fort', 'Ref', 'Will', 'Defensive', 'DR', 'Resist', 'Immune', 
-    'STATISTICS', 'Base', 'Atk', 'CMB', 'CMD', 'Feats'
+    'STATISTICS', 'Base', 'Atk', 'CMB', 'CMD', 'Feats', 'Skills'
 ]
 
 
@@ -46,7 +46,7 @@ def _format_creature_entry(entry):
     '''Returns copy of provided Creature entry formatted such that
     it is easily parsable
     
-    :param entry: Creature entry scraped from d20pfsrd bestiary page
+    :param entry: Creature entry scraped from d20pfsrd Bestiary page
     :returns: a formatted copy of the Creature entry
     '''
     # handle unicode characters
@@ -103,7 +103,7 @@ def _populate_ability_scores(words, creature):
     the Creature's entry on d20pfsrd.com split into individual 
     words
     
-    :param words: text of d20pfsrd bestiary page as list of words
+    :param words: text of d20pfsrd Bestiary page as list of words
     :param creature: Creature object to be populated
     '''
     for key in creature.ability_scores.keys():
@@ -121,7 +121,7 @@ def _populate_ac(words, creature):
     '''Populates a Creature object's armor class values using the 
     Creature's entry on d20pfsrd.com split into individual words
     
-    :param words: text of d20pfsrd bestiary page as list of words
+    :param words: text of d20pfsrd Bestiary page as list of words
     :param creature: Creature object to be populated
     '''
     for key in creature.ac.keys():
@@ -136,7 +136,7 @@ def _populate_bab(words, creature):
     '''Populates a Creature object's base attack bonus value using the
     Creature's entry on d20pfsrd.com split into individual words
     
-    :param words: text of d20pfsrd bestiary page as list of words
+    :param words: text of d20pfsrd Bestiary page as list of words
     :param creature: Creature object to be populated
     '''
     index = words.index('Atk', words.index('STATISTICS'))
@@ -145,6 +145,43 @@ def _populate_bab(words, creature):
     parsed_bab = parsed_bab.replace(';', '')
     parsed_bab = parsed_bab.replace('+', '')
     creature.bab = parsed_bab
+
+def _populate_cmb(words, creature):
+    '''Populates a Creature object's Combat Maneuver Bonus (CMB) value
+    using the Creature's entry on d20pfsrd.com split into individual 
+    words
+    
+    :param words: text of d20pfsrd Bestiary page as list of words
+    :param creature: Creature object to be populated
+    '''
+    index = words.index('CMB', words.index('STATISTICS'))
+    parsed_cmb = words[index+1]
+    parsed_cmb = parsed_cmb.replace(',', '')
+    parsed_cmb = parsed_cmb.replace(';', '')
+    parsed_cmb = parsed_cmb.replace('+', '')
+    if parsed_cmb == '-' or parsed_cmb == '--':
+        creature.cmb = '-1'
+    else:
+        creature.cmb = parsed_cmb
+
+
+def _populate_cmd(words, creature):
+    '''Populates a Creature object's Combat Maneuver Defense (CMD)
+    value using the Creature's entry on d20pfsrd.com split into individual 
+    words
+    
+    :param words: text of d20pfsrd Bestiary page as list of words
+    :param creature: Creature object to be populated
+    '''
+    index = words.index('CMD', words.index('STATISTICS'))
+    parsed_cmd = words[index+1]
+    parsed_cmd = parsed_cmd.replace(',', '')
+    parsed_cmd = parsed_cmd.replace(';', '')
+    creature.cmd = parsed_cmd
+    if parsed_cmd == '-' or parsed_cmd == '--':
+        creature.cmd = '-1'
+    else:
+        creature.cmd = parsed_cmd
 
 
 def _populate_cr_and_mr(text, creature):
@@ -235,6 +272,8 @@ def _populate_from_entry_values(root, creature):
     _populate_saves(content_words, creature)
     _populate_ability_scores(content_words, creature)
     _populate_bab(content_words, creature)
+    _populate_cmb(content_words, creature)
+    _populate_cmd(content_words, creature)
 
 
 def _populate_hp_and_hd(words, creature):
@@ -242,7 +281,7 @@ def _populate_hp_and_hd(words, creature):
     values using the Creature's entry on d20pfsrd.com split into 
     individual words
     
-    :param words: text of d20pfsrd bestiary page as list of words
+    :param words: text of d20pfsrd Bestiary page as list of words
     :param creature: Creature object to be populated
     '''
     # get the Creature's hp value
@@ -274,7 +313,7 @@ def _populate_saves(words, creature):
     Creature's entry on d20pfsrd.coms split into individual
     words
     
-    :param words: text of d20pfsrd bestiary page as list of words
+    :param words: text of d20pfsrd Bestiary page as list of words
     :param creature: Creature object to be populated
     '''
     for key in creature.saves.keys():

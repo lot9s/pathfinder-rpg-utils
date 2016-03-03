@@ -28,4 +28,6 @@ def build(dict_):
     for key in creature.ability_scores.keys():
         creature.ability_scores[key] = dict_[key]
     creature.bab = dict_['BAB']
+    creature.cmb = dict_['CMB']
+    creature.cmd = dict_['CMD']
     return creature

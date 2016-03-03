@@ -1,5 +1,7 @@
-CR,name,hp,HD,AC,touch,flat-footed,Fort,Ref,Will,Str,Dex,Con,Int,Wis,Cha,BAB
-0.16,Platypus,3,1,14,14,12,1,4,1,2,14,8,2,13,11,0
-5,Giant Winged Chupacabra,51,6,15,13,12,8,7,4,17,15,16,3,15,16,6
-7,Shaitan,85,9,20,10,19,10,4,8,20,13,19,14,14,15,9
-9,Minotaur Elder,114,12,22,9,22,10,8,11,24,10,19,9,16,10,12
+CR,name,hp,HD,AC,touch,flat-footed,Fort,Ref,Will,Str,Dex,Con,Int,Wis,Cha,BAB,CMB,CMD
+0.16,Platypus,3,1,14,14,12,1,4,1,2,14,8,2,13,11,0,0,6
+5,Giant Winged Chupacabra,51,6,15,13,12,8,7,4,17,15,16,3,15,16,6,9,22
+5,Ice Golem,53,6,17,9,17,2,1,2,16,9,-1,-1,11,1,6,9,18
+7,Shaitan,85,9,20,10,19,10,4,8,20,13,19,14,14,15,9,15,26
+9,Minotaur Elder,114,12,22,9,22,10,8,11,24,10,19,9,16,10,12,20,30
+10,Clay Golem,101,13,24,8,24,4,3,4,24,9,-1,-1,11,1,13,21,30
