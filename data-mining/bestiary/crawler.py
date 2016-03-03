@@ -22,11 +22,7 @@ __all__ = []
 MAX_ATTEMPTS = 3
 
 PROBLEM_LINKS = []
-
-PROBLEM_SUFFIXES = [
-    '-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', 
-    '/rakshasa'
-]
+PROBLEM_SUFFIXES = []
 
 THIRD_PARTY_PUBLISHERS = [
     '4 Winds Fantasy Gaming', 'Alluria Publishing', 
@@ -126,8 +122,10 @@ def get_html_indeces():
 
 def is_problem_link(link):
     '''Determines whether or not the provided link is a "problem" 
-    link. In this context, a "problem" link is defined as one that
-    leads to a non-creature entry or 3rd-party content.
+    link. 
+    
+    In this context, a "problem" link is defined as one that
+    leads to a mal-formed creature entry or 3rd-party content.
     
     :param link: string containing link to Bestiary page on d20pfsrd
     :returns: True if the link is a "problem" link, False otherwise
@@ -145,8 +143,10 @@ def is_problem_link(link):
 
 def is_problem_page(root):
     '''Determines whether or not the provided web page is a "problem"
-    page. In this context, a "problm" page is defined as one that does
-    not contain a 3rd-party creature.
+    page. 
+    
+    In this context, a "problem" page is defined as one that contains
+    3rd-party content.
     
     :param root: root HtmlElement of a Bestiary page from d20pfsrd.com
     :returns: True if the page is a problem page, False otherwise
@@ -174,10 +174,26 @@ def load_problem_links(file_name='LINKS_PROBLEM.txt'):
     '''Loads file containing list of substrings found in "problem" links
     and loads it into the PROBLEM_LINKS global variable.
     
+    In this context, a "problem" link is defined as one that
+    leads to a mal-formed creature entry or 3rd-party content.
+    
     :param file_name: file containing list of substrings
     '''
     f = open(file_name, 'r')
     PROBLEM_LINKS = f.read().split('\n')
+
+
+def load_problem_suffixes(file_name='LINKS_PROBLEM_SUFFIXES.txt'):
+    '''Loads file containing list of suffixes found in "problem" links
+    and loads it into the PROBLEM_SUFFIXES global variable.
+    
+    In this context, a "problem" link is defined as one that
+    leads to a mal-formed creature entry or 3rd-party content.
+    
+    :param file_name: file containing list of substrings
+    '''
+    f = open(file_name, 'r')
+    PROBLEM_SUFFIXES = f.read().split('\n')
 
 
 # --- Script --- 
@@ -189,6 +205,7 @@ def load_problem_links(file_name='LINKS_PROBLEM.txt'):
 # .csv formats.
 if __name__ == '__main__':
     load_problem_links()
+    load_problem_suffixes()
     
     # default settings
     db_name = 'creature.db'
