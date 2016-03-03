@@ -3,11 +3,9 @@ the Bestiary pages of d20pfsrd.com and place it in a database'''
 
 
 import argparse
-import sys
 import traceback
 
 from lxml.html import parse
-from core.creature import Creature
 from core.builders.creature.d20pfsrd import build as d20_build
 from core.builders.creature.dict import build as dict_build
 from db.creatureDB import CreatureDB
@@ -23,22 +21,14 @@ MAX_ATTEMPTS = 3
 
 PROBLEM_LINKS = []
 PROBLEM_SUFFIXES = []
-
-THIRD_PARTY_PUBLISHERS = [
-    '4 Winds Fantasy Gaming', 'Alluria Publishing', 
-    'Frog God Games', 'Green Ronin Publishing', 
-    'Jon Brazer Enterprises', 'Mystic Eye Games', 
-    'Necromancer Games', 'Open Design LLC', 'Paizo Fans United', 
-    'Super Genius Games', 'The Way of the Samurai', 
-    'Tricky Owlbear Publishing'
-]
+THIRD_PARTY_PUBLISHERS = []
 
 
 # --- Functions ---
 def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
     '''Creates a row in a CreatureDB object using a .csv file
     containing creature attributes as described in the documentation
-    for this project.
+    for this project
     
     :param db_conn: an open Connection object to a CreatureDB
     :param file_name: name of .csv file containing creature data
@@ -122,7 +112,7 @@ def get_html_indeces():
 
 def is_problem_link(link):
     '''Determines whether or not the provided link is a "problem" 
-    link. 
+    link
     
     In this context, a "problem" link is defined as one that
     leads to a mal-formed creature entry or 3rd-party content.
@@ -143,7 +133,7 @@ def is_problem_link(link):
 
 def is_problem_page(root):
     '''Determines whether or not the provided web page is a "problem"
-    page. 
+    page
     
     In this context, a "problem" page is defined as one that contains
     3rd-party content.
@@ -170,30 +160,16 @@ def is_problem_page(root):
     return False
 
 
-def load_problem_links(file_name='LINKS_PROBLEM.txt'):
-    '''Loads file containing list of substrings found in "problem" links
-    and loads it into the PROBLEM_LINKS global variable.
+def load_list(file_name):
+    '''Gets list of newline-separated strings from file
     
-    In this context, a "problem" link is defined as one that
-    leads to a mal-formed creature entry or 3rd-party content.
-    
-    :param file_name: file containing list of substrings
+    :param file_name: file containing list of strings
+    :returns list of strings
     '''
-    f = open(file_name, 'r')
-    PROBLEM_LINKS = f.read().split('\n')
-
-
-def load_problem_suffixes(file_name='LINKS_PROBLEM_SUFFIXES.txt'):
-    '''Loads file containing list of suffixes found in "problem" links
-    and loads it into the PROBLEM_SUFFIXES global variable.
-    
-    In this context, a "problem" link is defined as one that
-    leads to a mal-formed creature entry or 3rd-party content.
-    
-    :param file_name: file containing list of substrings
-    '''
-    f = open(file_name, 'r')
-    PROBLEM_SUFFIXES = f.read().split('\n')
+    file_ = open(file_name, 'r')
+    list_ = file_.read().split('\n')
+    file_.close()
+    return list_
 
 
 # --- Script --- 
@@ -204,8 +180,9 @@ def load_problem_suffixes(file_name='LINKS_PROBLEM_SUFFIXES.txt'):
 # The resulting database will be exported in both .db (SQLite 3) and 
 # .csv formats.
 if __name__ == '__main__':
-    load_problem_links()
-    load_problem_suffixes()
+    THIRD_PARTY_PUBLISHERS = load_list('3PP.txt')
+    PROBLEM_LINKS = load_list('LINKS_PROBLEM.txt')
+    PROBLEM_SUFFIXES = load_list('LINKS_PROBLEM_SUFFIXES.txt')
     
     # default settings
     db_name = 'creature.db'
@@ -221,7 +198,7 @@ if __name__ == '__main__':
     #                    nargs=1, choices=('standard', '3pp', 'all'),
     #                    help='sets type of creatures in db')
     parser.add_argument('--cr-range', 
-                        nargs=2, metavar=('MIN','MAX'), type=float,
+                        nargs=2, metavar=('MIN', 'MAX'), type=float,
                         help='sets valid range of CR values')
     args = vars(parser.parse_args())
     
