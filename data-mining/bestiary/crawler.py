@@ -13,11 +13,7 @@ from core.builders.creature.dict import build as dict_build
 from db.creatureDB import CreatureDB
 
 
-__all__ = [
-    'create_db_entries_from_csv', 'create_db_entry_from_link', 
-    'get_creature_links', 'get_html_indeces', 'is_problem_link', 
-    'is_problem_page'
-]
+__all__ = []
 
 
 # --- Constants ---
@@ -25,13 +21,7 @@ __all__ = [
 # a web page
 MAX_ATTEMPTS = 3
 
-PROBLEM_LINKS = [
-    '/corgi-dire', 'chupacabra-giant-winged', '/darkwood-cobra', 
-    '/dlurgraven', '/formian-hive-queen', '/gashadokuru', '/golem-clay',
-    '/golem-ice', '/minotaur-elder', '/mithral-cobra', '/mold-russet', 
-    'platypus', 'shaitan', '/sinspawn-hub', '/zombie-hill-giant', 
-    'sites.google.com', 'templates', 'TOC-'
-]
+PROBLEM_LINKS = []
 
 PROBLEM_SUFFIXES = [
     '-TOHC', '-tohc', '-3PP', '-ff', '-kp', '-mb', '/beheaded', 
@@ -132,8 +122,8 @@ def get_html_indeces():
     for i, item in enumerate(creature_indeces):
         creature_indeces[i] = creature_indeces[i].rstrip()
     return creature_indeces
-    
-    
+
+
 def is_problem_link(link):
     '''Determines whether or not the provided link is a "problem" 
     link. In this context, a "problem" link is defined as one that
@@ -179,7 +169,17 @@ def is_problem_page(root):
         return True
     return False
 
+
+def load_problem_links(file_name='LINKS_PROBLEM.txt'):
+    '''Loads file containing list of substrings found in "problem" links
+    and loads it into the PROBLEM_LINKS global variable.
     
+    :param file_name: file containing list of substrings
+    '''
+    f = open(file_name, 'r')
+    PROBLEM_LINKS = f.read().split('\n')
+
+
 # --- Script --- 
 # By default, if this module is executed as a script, it will try to
 # build a database of non-3rd party Pathfinder creatures by scraping
@@ -188,16 +188,23 @@ def is_problem_page(root):
 # The resulting database will be exported in both .db (SQLite 3) and 
 # .csv formats.
 if __name__ == '__main__':
+    load_problem_links()
+    
     # default settings
     db_name = 'creature.db'
     cr_range = [0.0, float('inf')]
     cr_flag = False
     
     # create parser for command line arguments
-    parser = argparse.ArgumentParser(description='Build a creature database')
+    parser = argparse.ArgumentParser(description='Builds a creature database')
     parser.add_argument('-C', action='store_true',
                         help='store CR values as strings, not integers')
-    parser.add_argument('--cr-range', nargs=2,
+    #TODO: add this functionality in
+    #parser.add_argument('--content',
+    #                    nargs=1, choices=('standard', '3pp', 'all'),
+    #                    help='sets type of creatures in db')
+    parser.add_argument('--cr-range', 
+                        nargs=2, metavar=('MIN','MAX'), type=float,
                         help='sets valid range of CR values')
     args = vars(parser.parse_args())
     
@@ -206,8 +213,7 @@ if __name__ == '__main__':
         if key == 'C':
             cr_flag = args['C']
         if key == 'cr_range':
-            cr_range[0] = float(args['cr_range'][0])
-            cr_range[1] = float(args['cr_range'][1])
+            cr_range = args['cr_range']
     
     # create sqlite3 database
     db_connection = CreatureDB(db_name, cr_flag)
