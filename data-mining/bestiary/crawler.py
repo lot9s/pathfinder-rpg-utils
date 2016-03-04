@@ -16,12 +16,19 @@ __all__ = []
 
 # --- Constants ---
 # The maximum number of retries allowed when attempting to download
-# a web page
+#   a web page
 MAX_ATTEMPTS = 3
 
+# TODO: Content Collection Modes
+#MODE_3PP = 1        # collect 3rd party content only
+#MODE_ALL = 2        # collect all content
+#MODE_STANDARD = 0   # collect non-3rd party content only
+
+# Each of these lists is used to filter content scraped from the 
+#   Bestiary pages of d20pfsrd.com depending on the Content Collection
+#   Mode.
 PROBLEM_LINKS = []
 PROBLEM_SUFFIXES = []
-
 THIRD_PARTY_SPECIAL_LINKS = []
 THIRD_PARTY_PUBLISHERS = []
 
@@ -47,7 +54,6 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
         # create Creature object
         creature_dict = dict(zip(creature_keys, creature_features))
         creature = dict_build(creature_dict)
-        print creature
         # add Creature object to database
         db_conn.add_creature(creature)
         
@@ -83,7 +89,7 @@ def create_db_entry_from_link(db_conn, link):
 
 
 def get_creature_links(page):
-    '''Obtains the list of links to all non-3rd party creatures on the
+    '''Gets the list of links to all non-3rd party creatures on the
     given page
     
     :param page: link to Bestiary page on d20pfsrd
@@ -104,7 +110,7 @@ def get_creature_links(page):
 
 
 def get_html_indeces():
-    '''Obtains the list of links to pages of creatures clustered by 
+    '''Gets the list of links to pages of creatures clustered by 
     Challenge Rating (CR)
     '''
     index_file = open('INDEX.txt', 'r')
@@ -112,6 +118,44 @@ def get_html_indeces():
     for i, item in enumerate(creature_indeces):
         creature_indeces[i] = creature_indeces[i].rstrip()
     return creature_indeces
+
+
+def is_3pp_link(link):
+    '''Determines whether or not the provided link leads to 3rd party
+    content
+    
+    :param link: string containing link to Bestiary page on d20pfsrd
+    :returns: True if link leads to 3rd party content, False otherwise
+    '''
+    for problem_link in THIRD_PARTY_SPECIAL_LINKS:
+        if problem_link in link:
+            return True
+    return False
+
+
+def is_3pp_page(root):
+    '''Determines whether or not the given HtmlElement node contains
+    3rd party content
+    
+    :param root: root HtmlElement of a Bestiary page from d20pfsrd.com
+    :returns: True if page contains 3rd party content, False otherwise
+    '''
+    # check if publisher is a 3rd-party publisher
+    footers = root.cssselect('.sites-tile-name-footer')
+    if footers:
+        for footer in footers:
+            footer_text = footer.text_content()
+            if (u'\xc2' in footer_text or
+                   '(c)' in footer_text or 'Copyright' in footer_text):
+                for publisher in THIRD_PARTY_PUBLISHERS:
+                    if publisher in footer_text:
+                        return True
+    # check if title indicates that creature has 3rd-party affiliation
+    title_element = root.cssselect('title')
+    title = title_element[0].text
+    if title and '3pp' in title:
+        return True
+    return False
 
 
 def is_problem_link(link):
@@ -128,43 +172,23 @@ def is_problem_link(link):
     for problem_link in PROBLEM_LINKS:
         if problem_link in link:
             return True
-    for problem_link in THIRD_PARTY_SPECIAL_LINKS:
-        if problem_link in link:
-            return True
-    #check if link has a suffix on list of problematic suffixes
-    for suffix in PROBLEM_SUFFIXES:
-        if link[-1 * len(suffix):] == suffix:
-            return True
+    # check if link has a suffix on list of problematic suffixes
+    if link.endswith(tuple(PROBLEM_SUFFIXES)):
+        return True
+    # check if link contains 3rd party content
+    if is_3pp_link(link):
+        return True
     return False
 
 
 def is_problem_page(root):
-    '''Determines whether or not the provided web page is a "problem"
-    page
-    
-    In this context, a "problem" page is defined as one that contains
-    3rd-party content.
+    '''Determines whether or not the content in the provided HtmlElemnt
+    node is desired
     
     :param root: root HtmlElement of a Bestiary page from d20pfsrd.com
-    :returns: True if the page is a problem page, False otherwise
+    :returns: True if content on page is desired, False otherwise
     '''
-    # check if publisher is a 3rd-party publisher
-    #text_boxes = root.cssselect('.sites-embed-content-textbox')
-    footers = root.cssselect('.sites-tile-name-footer')
-    if footers:
-        for footer in footers:
-            footer_text = footer.text_content()
-            if (u'\xc2' in footer_text or
-                   '(c)' in footer_text or 'Copyright' in footer_text):
-                for publisher in THIRD_PARTY_PUBLISHERS:
-                    if publisher in footer_text:
-                        return True
-    # check if title indicates that creature has 3rd-party affiliation
-    title_element = root.cssselect('title')
-    title = title_element[0].text
-    if title and '3pp' in title:
-        return True
-    return False
+    return is_3pp_page(root)
 
 
 def load_list(file_name):
@@ -196,26 +220,32 @@ if __name__ == '__main__':
     db_name = 'creature.db'
     cr_range = [0.0, float('inf')]
     cr_flag = False
+    #content_mode = MODE_STANDARD
     
     # create parser for command line arguments
     parser = argparse.ArgumentParser(description='Builds a creature database')
+    # - challenge rating storage mode
     parser.add_argument('-C', action='store_true',
                         help='store CR values as strings, not integers')
-    #TODO: add this functionality in
-    #parser.add_argument('--content',
-    #                    nargs=1, choices=('standard', '3pp', 'all'),
-    #                    help='sets type of creatures in db')
+    # - range of accepted challenge rating values
     parser.add_argument('--cr-range', 
                         nargs=2, metavar=('MIN', 'MAX'), type=float,
                         help='sets valid range of CR values')
+    # TODO: - content collection mode
+    #content_mode_choices = ['standard', '3pp', 'all']
+    #parser.add_argument('--content',
+    #                    nargs=1, choices=content_mode_choices,
+    #                    help='sets type of creatures in db')
     args = vars(parser.parse_args())
     
     # handle command line arguments
     for key in args:
         if key == 'C':
             cr_flag = args['C']
-        if key == 'cr_range':
+        if key == 'cr_range' and args['cr_range']:
             cr_range = args['cr_range']
+    #    if key == 'content':
+    #        content_mode = content_mode_choices.index(args['content'][0])
     
     # create sqlite3 database
     db_connection = CreatureDB(db_name, cr_flag)
