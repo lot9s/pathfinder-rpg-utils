@@ -1,14 +1,13 @@
 /corgi-dire
 /chupacabra-giant-winged
-/darkwood-cobra 
-/dlurgraven
+/darkwood-cobra
 /formian-hive-queen
 /gashadokuru
 /golem-clay
 /golem-ice
 /minotaur-elder
 /mithral-cobra
-/mold-russet 
+/mold-russet
 /platypus
 /shaitan
 /sinspawn-hub

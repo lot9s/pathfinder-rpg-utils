@@ -21,6 +21,8 @@ MAX_ATTEMPTS = 3
 
 PROBLEM_LINKS = []
 PROBLEM_SUFFIXES = []
+
+THIRD_PARTY_SPECIAL_LINKS = []
 THIRD_PARTY_PUBLISHERS = []
 
 
@@ -45,6 +47,7 @@ def create_db_entries_from_csv(db_conn, file_name='CREATURES_SPECIAL.csv'):
         # create Creature object
         creature_dict = dict(zip(creature_keys, creature_features))
         creature = dict_build(creature_dict)
+        print creature
         # add Creature object to database
         db_conn.add_creature(creature)
         
@@ -66,6 +69,7 @@ def create_db_entry_from_link(db_conn, link):
             # if the link is acceptable, create a creature entry in our database
             if not is_problem_page(root):
                 creature = d20_build(root)
+                print creature
                 db_conn.add_creature(creature)
         # if I/O exception raised, try again
         except IOError:
@@ -122,6 +126,9 @@ def is_problem_link(link):
     '''
     # check if link is on list of problematic links
     for problem_link in PROBLEM_LINKS:
+        if problem_link in link:
+            return True
+    for problem_link in THIRD_PARTY_SPECIAL_LINKS:
         if problem_link in link:
             return True
     #check if link has a suffix on list of problematic suffixes
@@ -181,6 +188,7 @@ def load_list(file_name):
 # .csv formats.
 if __name__ == '__main__':
     THIRD_PARTY_PUBLISHERS = load_list('3PP.txt')
+    THIRD_PARTY_SPECIAL_LINKS = load_list('LINKS_SPECIAL_3PP.txt')
     PROBLEM_LINKS = load_list('LINKS_PROBLEM.txt')
     PROBLEM_SUFFIXES = load_list('LINKS_PROBLEM_SUFFIXES.txt')
     
