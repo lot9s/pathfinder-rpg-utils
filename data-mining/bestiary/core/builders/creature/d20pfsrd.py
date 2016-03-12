@@ -14,7 +14,8 @@ __all__ = ['build']
 ABILITIES = ['Str', 'Dex', 'Con', 'Int', 'Wis', 'Cha']
 ATTRIBUTES = [
     'DEFENSE', 'hp', 'AC', 'touch', 'flat-footed', 
-    'Fort', 'Ref', 'Will', 'Defensive', 'DR', 'Resist', 'Immune', 
+    'Fort', 'Ref', 'Will', 'Defensive', 'DR', 'Resist', 'Immune',
+    'Vulnerabilities', 'Weakness', 
     'STATISTICS', 'Base', 'Atk', 'CMB', 'CMD', 'Feats', 'Skills'
 ]
 
@@ -107,7 +108,7 @@ def _populate_ability_scores(words, creature):
     :param creature: Creature object to be populated
     '''
     for key in creature.ability_scores.keys():
-        index = words.index(key, words.index("STATISTICS"))
+        index = words.index(key, words.index('STATISTICS'))
         parsed_ability = words[index+1]
         parsed_ability = parsed_ability.replace(',', '')
         parsed_ability = parsed_ability.replace(';', '')
