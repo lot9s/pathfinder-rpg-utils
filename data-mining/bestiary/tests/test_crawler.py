@@ -7,7 +7,8 @@ sys.path.append('..')
 
 import unittest
 from lxml.html import parse
-from bestiary.core.creature import Creature
+from core.builders.creature.d20pfsrd import build as d20_build
+from core.creature import Creature
 
 
 class TestCreature(unittest.TestCase):
@@ -26,8 +27,7 @@ class TestCreature(unittest.TestCase):
         parsed_html = parse(link)
         root = parsed_html.getroot()
         # create Creature from root
-        creature = Creature()
-        creature.update_via_htmlelement(root)
+        creature = d20_build(root)
         # check if the Creature's attributes match expectations
         for key in creature.ability_scores.keys():
             self.assertEqual(creature.ability_scores[key],
@@ -45,8 +45,7 @@ class TestCreature(unittest.TestCase):
         parsed_html = parse(link)
         root = parsed_html.getroot()
         # create Creature from root
-        creature = Creature()
-        creature.update_via_htmlelement(root)
+        creature = d20_build(root)
         # check if the Creature's attributes match expectations
         self.assertEqual(creature.name, expected_name)
         self.assertEqual(creature.cr, expected_cr)    
