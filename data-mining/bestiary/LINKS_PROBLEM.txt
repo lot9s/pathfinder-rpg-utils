@@ -37,6 +37,8 @@
 /screaming-skull-cacophony-golem
 /shaitan
 /sinspawn-hub
+/undead/zombie/zombie-kobold
+/vermin/pond-drinker
 /zombie-hill-giant
 sites.google.com
 templates
