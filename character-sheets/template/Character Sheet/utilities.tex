@@ -1,0 +1,129 @@
+\usepackage{color}
+\usepackage{fp}
+\usepackage{ifthen}
+
+% -- New Colors --
+\definecolor{acidgreen}{RGB}{155,155,0}
+\definecolor{blue}{RGB}{0,0,255}
+\definecolor{coldblue}{RGB}{51, 153, 255}
+\definecolor{cursepurple}{RGB}{85, 26, 139}
+\definecolor{electricblue}{RGB}{55, 155, 155}
+\definecolor{darkgreen}{RGB}{0,100,0}
+\definecolor{firered}{RGB}{255,100,0}
+\definecolor{lightyellow}{RGB}{225,200,0}
+\definecolor{shadecolor}{RGB}{0,25,0}
+
+% -- New Commands ---
+
+% This command calculates the final ability score #1 calculated from the sum of the provided
+% modifiers.
+%
+% #1 - The name of the ability score that will receive the final value.
+% #2 - Base Score
+% #3 - Racial Modifier
+% #4 - Level Up Bonus
+% #5 - Inherent Bonus
+% #6 - Enhancement Bonus
+% #7 - Misc. Bonus
+\newcommand{\ability}[7]{\FPeval{#1}{clip(#2+(#3)+#4+#5+#6+(#7))}}
+
+% This command calculates the ability modifier of #2 and places that value in the variable
+% named #1.
+%
+% #1 - The name of the variable that will receive the final value.
+% #2 - Base Score
+\newcommand{\abilitymodifier}[2]{\FPeval{\temp}{clip(#2 - 10)}%
+							  \FPifneg{\temp}%
+								 \FPeval{#1}{round((#2 - 10)/2, 0)}%
+							  \else%
+                                     \FPeval{#1}{trunc((#2 - 10)/2, 0)}%
+							  \fi}
+
+% This macro changes the color of the displayed text to a cool green to denote acid damage.
+\newcommand{\aciddamage}[1]{\color{acidgreen}\textbf{#1}\color{black}}
+							
+% This command calculates a character's armor class #1 by adding together #2-#6. 
+%
+% #1 - The name of the constant that will receive the final value.
+% #2 - Armor Bonus
+% #3 - Shield Bonus
+% #4 - Natural Armor Bonus
+% #5 - Dexterity Modifier
+% #6 - Deflection Bonus
+% #7 - Size Modifier
+\newcommand{\armorclass}[7]{\FPeval{#1}{clip(10+#2+#3+#4+(#5)+#6+(#7))}}
+
+% This command calculates the attack bonus for a particular attack denoted by #1 by adding
+% together the modifiers given by #2-#6. 
+%
+% #1 - The name of the attack that will receive the final value.
+% #2 - Base Attack Bonus
+% #3 - Ability Modifier
+% #4 - Enhancement Bonus
+% #5 - Size Modifier
+% #6 - Feat Bonus
+\newcommand{\attack}[6]{\FPeval{#1}{clip(#2+(#3)+#4+(#5)+(#6))}}
+
+% This macro changes the color of the displayed text to a cool blue to denote cold damage.
+\newcommand{\colddamage}[1]{\color{coldblue}\textbf{#1}\color{black}}
+
+% This command calculates the final Combat Maneuver Bonus (CMB) #1 calculated from the sum
+% of #2-#4.
+%						 
+% #1 - The name of the constant that this value will be placed in
+% #2 - Base Attack Bonus
+% #3 - Dexterity Modifier (w/o Agile Maneuvers feat this is Strength Modifier)
+% #4 - Size Modifier
+\newcommand{\combatmaneuverbonus}[4]{\FPeval{#1}{clip(#2+(#3)+(#4))}}
+
+% This command calculates the final Combat Maneuver Defense (CMD) #1 calculated from the sum
+% of #2-#5.
+%
+% #1 - The name of the constant that this value will be placed in
+% #2 - Base Attack Bonus
+% #3 - Strength Modifier
+% #4 - Dexterity Modifier
+% #5 - Size Modifier
+\newcommand{\combatmaneuverdefense}[5]{\FPeval{#1}{clip(10+#2+(#3)+(#4)+(#5))}}
+
+% This macro changes the color of the displayed text to an awesome purple to denote the 
+% effects of a curse.
+\newcommand{\cursedstat}[1]{\color{cursepurple}\textbf{#1}\color{black}}
+
+% This macro changes the color of the displayed text to a cool red to denote fire damage.
+\newcommand{\electricitydamage}[1]{\color{electricblue}\textbf{#1}\color{black}}
+
+% This macro changes the color of the displayed text to a pleasing green to denote magical 
+% enhancement.
+\newcommand{\enhancedstat}[1]{\color{darkgreen}\textbf{#1}\color{black}}
+
+% This macro changes the color of the displayed text to a cool red to denote fire damage.
+\newcommand{\firedamage}[1]{\color{firered}\textbf{#1}\color{black}}
+
+% This macro changes the color of the displayed text to an awful red to denote a penalty.
+\newcommand{\reducedstat}[1]{\color{red}\textbf{#1}\color{black}}
+
+% This command calculates a saving throw value from the sum of #2-#6 and places the result
+% in the variable named #1.
+%
+% #1 - The name of the saving throw that will receive the final value.
+% #2 - Base Save
+% #3 - Ability Modifier
+% #4 - Feat Bonus
+% #5 - Resistance Bonus
+% #6 - Miscellaneous Bonus
+\newcommand{\savingthrow}[6]{\FPeval{#1}{clip(#2+(#3)+#4+#5+#6)}}
+
+% This command calculates a skill value from the sum of #2-#9 and places the result in the
+% the variable named #1.
+%
+% #1 - The name of the skill that will receive the final value.
+% #2 - Ranks
+% #3 - Ability Modifier
+% #4 - Class Skill Bonus
+% #5 - Racial Modifier
+% #6 - Feat Bonus
+% #7 - Enhancement Bonus
+% #8 - Misc. Modifier
+% #9 - Armor Check Penalty
+\newcommand{\skill}[9]{\FPeval{#1}{clip(#2+(#3)+#4+(#5)+#6+#7+(#8)+(#9))}}

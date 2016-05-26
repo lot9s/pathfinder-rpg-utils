@@ -1,6 +1,6 @@
-'''This module contains a script and functions for obtaining a list of URLs from 
-d20pfsrd.com, an unofficial System Reference Document (SRD) for the 
-Pathfinder RPG. 
+'''This module contains a script and functions for obtaining a list
+of URLs from d20pfsrd.com, an unofficial System Reference Document
+(SRD) for the Pathfinder RPG. 
 
 This list is meant to act as an index of creatures sorted by 
 Challenge Rating (CR).
@@ -15,13 +15,14 @@ __all__ = ['create_index_file', 'create_special_index_file']
 
 # --- Constants ---
 BASE_HREF = "http://www.d20pfsrd.com/"
-CREATURE_BY_CR_URL = "http://www.d20pfsrd.com/bestiary/-bestiary-by-challenge-rating"
+CREATURE_BY_CR_URL = 
+    "http://www.d20pfsrd.com/bestiary/-bestiary-by-challenge-rating"
 
 
 # --- Functions ---
 def create_index_file(file_name='INDEX.txt'):
-    '''Creates an index of links to d20pfsrd.com pages that contain links to 
-    creature pages sorted by Challenge Rating (CR)
+    '''Creates an index of links to d20pfsrd.com pages that contain
+    links to creature pages sorted by Challenge Rating (CR)
     
     :param file_name: the name of the output file
     '''
@@ -38,9 +39,9 @@ def create_index_file(file_name='INDEX.txt'):
    
     
 def create_special_index_file(file_name='INDEX_SPECIAL.txt'):
-    '''Creates an index of links to Creature pages on d20pfsrd.com that are not
-    obtainable by crawling the index file produced by create_index_file(...)
-    without special treatment.
+    '''Creates an index of links to Creature pages on d20pfsrd.com that
+    are not obtainable by crawling the index file produced by
+    create_index_file(...) without special treatment.
     
     :param file_name: the name of the output file
     '''
@@ -53,7 +54,8 @@ def create_special_index_file(file_name='INDEX_SPECIAL.txt'):
     for line in hub_file:
         html_tree = parse(line.strip())
         doc = html_tree.getroot()
-        link_table = doc.cssselect('.sites-tile-name-content-1 td:nth-child(1) a')
+        link_table = 
+            doc.cssselect('.sites-tile-name-content-1 td:nth-child(1) a')
         # write links to output file
         for link in link_table:
             out.write(link.get('href') + '\n')

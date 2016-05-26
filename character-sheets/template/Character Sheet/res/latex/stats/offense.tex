@@ -1,0 +1,19 @@
+% --- Bonuses
+\def \sizeattackbonus{0}
+
+% --- Penalties
+\def \sizecmbpenalty{0}
+\def \sizecmdpenalty{0}
+
+% --- Modifiers
+
+
+
+% --- *Base Attack
+\FPeval{\baseattack}{clip(\classonebaseattack)}
+
+% --- *Attacks
+
+% --- *CMB/CMD
+\combatmaneuverbonus{\charactercmb}{\baseattack}{\strengthmod}{\sizecmbpenalty}
+\combatmaneuverdefense{\charactercmd}{\baseattack}{\strengthmod}{\dexteritymod}{\sizecmdpenalty}

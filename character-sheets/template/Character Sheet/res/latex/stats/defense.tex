@@ -1,0 +1,31 @@
+% --- Bonues
+\def \armoracbonus{0}
+\def \dodgeacbonus{0}
+\def \resistancebonus{0}
+\def \shieldacbonus{0}
+\def \sizeacbonus{0}
+
+% --- Penalties
+\def \acpenalty{0}
+
+
+
+% --- *Hit Points ---
+\FPeval{\bonushitpoints}{clip(\characterlevel * \constitutionmod)}
+\FPeval{\hitpoints}{clip(\classonehitpoints + \bonushitpoints)}
+
+% --- Armor Class
+\armorclass{\ac}{\armoracbonus}{\shieldacbonus}{0}{\dexteritymod}{\dodgeacbonus}{\sizeacbonus}
+\armorclass{\touchac}{0}{0}{0}{\dexteritymod}{\dodgeacbonus}{\sizeacbonus}
+\armorclass{\flatfootedac}{\armoracbonus}{\shieldacbonus}{0}{0}{0}{\sizeacbonus}
+
+% --- Saving Throws
+\FPeval{\basefortitude}{clip(\classonebasefortitude)}
+\FPeval{\basereflex}{clip(\classonebasereflex)}
+\FPeval{\basewill}{clip(\classonebasewill)}
+
+\savingthrow{\fortitude}{\basefortitude}{\constitutionmod}{0}{0}{\resistancebonus}
+\savingthrow{\reflex}{\basereflex}{\dexteritymod}{0}{0}{\resistancebonus}
+\savingthrow{\will}{\basewill}{\wisdommod}{0}{0}{\resistancebonus}
+
+% --- Spell Resistance

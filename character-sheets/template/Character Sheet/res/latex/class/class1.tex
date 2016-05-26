@@ -1,0 +1,29 @@
+
+\def \classonelevel{1}
+
+% --- *Class1 ---
+%	d??
+
+% --- Hit Dice
+\def \classonehitdice{\classonelevel d6}
+
+% --- Hit Points
+\def \classonehitpoints{6}
+
+% --- Base Attack
+\FPeval{\classonebaseattack}{trunc(\classonelevel / 2, 0)}
+
+% --- Saving Throws
+\FPeval{\classonebasefortitude}{trunc(\classonelevel / 3, 0)}
+\FPeval{\classonebasereflex}{trunc(\classonelevel / 3, 0)}
+\FPeval{\classonebasewill}{trunc(\classonelevel / 3, 0)}
+
+% --- *Class1 ---
+%	2 + 0 [Intelligence Modifier]
+%	Class Skills - 
+%
+%	Level  1			2 (base) + 0 (int)
+%	-----------------------------------------------
+%	Total Skill Points:	2
+
+% --- Skills

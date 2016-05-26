@@ -1,0 +1,124 @@
+% --- Character Info ---
+\def \name{CHARACTER}
+\def \characteralignment{N \hspace{1pt}}
+
+\def \characterlevel{1}
+\def \experience{0}
+
+% --- *Racial Adjustments ---
+%	
+
+% Age: 
+% Height:
+% Weight:
+% Favored Class: 
+
+\def \race{Human}
+\def \racialsubtype{}
+\def \racialtype{humanoid \hspace{1pt}}
+\def \racialsize{Medium \hspace{1pt}}
+\def \racialspace{5 ft.}
+\def \racialreach{5 ft.}
+\def \baselandspeed{30}
+\def \baselandspeedsquares{6 squares}
+\def \favoredclass{}
+
+
+% --- Ability Scores ---
+\input{res/latex/stats/ability-scores}
+
+% --- Class ---
+\input{res/latex/class/class1}
+
+% --- Defense ---
+\input{res/latex/stats/defense}
+
+% --- Offense ---
+\input{res/latex/stats/offense}
+
+% --- Skills ---
+\input{res/latex/stats/skills}
+
+% --- Feats ---
+%	 1.	
+%	 3. 
+%	 5. 
+%	 7. 
+%	 9. 
+%	11. 
+%	13. 
+%	15. 
+%	17. 
+%	19. 
+%	21. 
+
+\def \feats{}
+
+% --- Miscellaneous ---
+\def \characterspeed{\baselandspeed}
+\def \characterlanguages{Common}
+
+\FPeval{\initiative}{clip(\dexteritymod)}
+
+\def \senses{Perception +\perceptionskill}
+
+%\def \specialattacks{}
+\def \specialqualities{}
+
+%\def \drawbacks{}
+\def \traits{}
+
+\def \combatgear{\textit{}}
+
+
+% --- PDF Output ---
+\AddToShipoutPictureBG{\includegraphics[width=\paperwidth,height=\paperheight]{res/img/paper.jpg}}
+\clearpage
+
+\newpage
+
+%\begin{center}
+%\includegraphics[scale=0.525]{res/img/character.jpg}
+%\end{center}
+
+\color{lightyellow}
+\begin{snugshade}
+\textbf{\name}
+\end{snugshade}
+\small \color{black}
+\textbf{XP \experience} \\
+\race \hspace{1pt} class1 \classonelevel \\
+\characteralignment \racialsize \racialtype \\
+\textbf{Init} +\initiative; \textbf{Senses} \senses \\
+\line(1,0){345} \\
+\underline{\textbf{DEFENSE \hspace{292pt}}} \\
+\textbf{AC} \ac \hspace{1pt} (+\dexteritymod \hspace{1pt} Dex.), touch \touchac, flat-footed \flatfootedac \\
+\textbf{hp} \hitpoints \hspace{1pt} (\classonehitdice+\bonushitpoints) \\
+\textbf{Fort} +\fortitude, \textbf{Ref} +\reflex, \textbf{Will} +\will \\
+\line(1,0){345} \\
+\underline{\textbf{OFFENSE \hspace{292pt}}} \\
+\textbf{Speed} \characterspeed \hspace{1pt} ft. \\
+\textbf{Melee} \\
+\textbf{Ranged}  \\
+\textbf{Special Attacks} \\
+\line(1,0){345} \\
+\underline{\textbf{STATISTICS \hspace{280pt}}} \\
+\textbf{Str} \strength, \textbf{Dex} \dexterity, \textbf{Con} \constitution, \textbf{Int} \intelligence, \textbf{Wis} \wisdom, \textbf{Cha} \charisma \\
+%\textbf{Space} \racialspace; \textbf{Reach} \racialreach \\
+\textbf{Base Attack} +\baseattack; \textbf{CMB} +\charactercmb; \textbf{CMD} \charactercmd \\
+\textbf{Feats} \feats \\
+\textbf{Skills} Acrobatics +\acrobaticsskill, Appraise +\appraiseskill, Bluff +\bluffskill, Climb +\climbskill, Craft +\craftbasketsskill, Diplomacy +\diplomacyskill, Disguise +\disguiseskill, Escape Artist +\escapeartistskill, Fly +\flyskill, Heal +\healskill, Intimidate +\intimidateskill, Perform +\performdanceskill, \\ Sense Motive +\sensemotiveskill, Stealth +\stealthskill, Survival +\survivalskill, Swim +\swimskill \\
+%\textbf{Drawbacks} \drawbacks \\
+\textbf{Traits} \traits \\
+\textbf{Special Qualities} \specialqualities \\
+\textbf{Combat Gear} \combatgear \\
+\textbf{Languages} \characterlanguages \\
+
+
+
+% --- Class Features ---
+\input{res/latex/class-features/display/class1}
+
+
+% --- Traits ---
+\input{res/latex/traits/display/traits}
