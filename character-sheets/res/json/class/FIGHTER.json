@@ -1,0 +1,46 @@
+{
+  "name" : "fighter",
+  "restrictions" : {},
+  "hit-die" : 10,
+  "skills" : [
+    "Climb",
+    "Craft",
+    "Handle Animal",
+    "Intimidate",
+    "Knowledge (dungeoneering)",
+    "Knowledge (engineering)",
+    "Profession",
+    "Ride",
+    "Survival",
+    "Swim"
+  ],
+  "skills-per-level": 2,
+  "base-attack": 1,
+  "saves" : {"Fort": 1, "Ref": 0, "Will": 0},
+  "starting-wealth": [
+    "5d6 x 10 gp",
+    "outfit worth 10 gp or less"
+  ],
+  "advancement": [
+    ["bonus feat"],
+    ["bonus feat", "bravery +1"],
+    ["armor training"],
+    ["bonus feat"],
+    ["weapon training"],
+    ["bonus feat", "bravery +2"],
+    ["armor training"],
+    ["bonus feat"],
+    ["weapon training"],
+    ["bonus feat", "bravery +3"],
+    ["armor training"],
+    ["bonus feat"],
+    ["weapon training"],
+    ["bonus feat", "bravery +4"],
+    ["armor training"],
+    ["bonus feat"],
+    ["weapon training"],
+    ["bonus feat", "bravery +5"],
+    ["armor mastery"],
+    ["bonus feat", "weapon mastery"]
+  ]
+}

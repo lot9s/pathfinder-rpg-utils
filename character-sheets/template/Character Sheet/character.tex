@@ -1,5 +1,5 @@
 % --- Character Info ---
-\def \name{CHARACTER}
+\def \name{$NAME}
 \def \characteralignment{N \hspace{1pt}}
 
 \def \characterlevel{1}
@@ -28,7 +28,7 @@
 \input{res/latex/stats/ability-scores}
 
 % --- Class ---
-\input{res/latex/class/class1}
+\input{res/latex/class/${class1}}
 
 % --- Defense ---
 \input{res/latex/stats/defense}
@@ -70,6 +70,9 @@
 
 \def \combatgear{\textit{}}
 
+% --- Display ---
+\def \displayclasses{${display_classes}}
+
 
 % --- PDF Output ---
 \AddToShipoutPictureBG{\includegraphics[width=\paperwidth,height=\paperheight]{res/img/paper.jpg}}
@@ -87,13 +90,13 @@
 \end{snugshade}
 \small \color{black}
 \textbf{XP \experience} \\
-\race \hspace{1pt} class1 \classonelevel \\
+\race \hspace{1pt} \displayclasses \\
 \characteralignment \racialsize \racialtype \\
 \textbf{Init} +\initiative; \textbf{Senses} \senses \\
 \line(1,0){345} \\
 \underline{\textbf{DEFENSE \hspace{292pt}}} \\
 \textbf{AC} \ac \hspace{1pt} (+\dexteritymod \hspace{1pt} Dex.), touch \touchac, flat-footed \flatfootedac \\
-\textbf{hp} \hitpoints \hspace{1pt} (\classonehitdice+\bonushitpoints) \\
+\textbf{hp} \hitpoints \hspace{1pt} (\${class1}hitdice+\bonushitpoints) \\
 \textbf{Fort} +\fortitude, \textbf{Ref} +\reflex, \textbf{Will} +\will \\
 \line(1,0){345} \\
 \underline{\textbf{OFFENSE \hspace{292pt}}} \\
@@ -117,7 +120,7 @@
 
 
 % --- Class Features ---
-\input{res/latex/class-features/display/class1}
+\input{res/latex/class-features/display/${class1}}
 
 
 % --- Traits ---

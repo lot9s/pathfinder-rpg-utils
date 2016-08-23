@@ -7,19 +7,37 @@ import fileinput
 import os
 import shutil
 
+from string import Template
+
+from core.pf_character import PFCharacter
+
 
 __all__ = []
 
 
-def find_and_replace(file_name, find_text, replacement_text):
-    '''Finds and replaces text in a file with different text
+# --- Constants ---
+TEMPLATE_FILES = [
+    '/main.tex', 
+    '/character.tex',
+    '/res/latex/class/class1.tex',
+    '/res/latex/stats/defense.tex',
+    '/res/latex/stats/offense.tex',
+]
 
-    :param file_name: the name of the relevant file
-    :param find_text: the text that will be found and replaced
-    :param replacement_text: the new text to replace the old
+
+def generate_character(dest_path, char_path="default.json"):
+    '''Generates a LaTeX project for a Pathfinder character sheet
+    
+    :param dest_path: destination directory for character sheet
+    :param char_path: path to JSON file with Pathfinder character data
     '''
-    for line in fileinput.input(file_name, inplace=True):
-        print line.replace(find_text, replacement_text).rstrip()
+    character = PFCharacter(char_path)
+    
+    # update the destination path string to reflect imported character vals
+    dest_path = "%s/%s" % (dest_path, character.name)
+    
+    shutil.copytree('template/Character Sheet', dest_path)
+    set_char_vals(dest_path, character.get_template_values())
 
 
 def parse_cmd_args():
@@ -31,41 +49,57 @@ def parse_cmd_args():
     help_desc = 'Generates LaTeX character sheets for the Pathfinder RPG'
     parser = argparse.ArgumentParser(description=help_desc)
 
-    # -argument- name of new character
-    parser.add_argument('char-name', help='name of new character')
-
     # -argument- sets destination directory for output
     parser.add_argument('dest', help='destination directory for output')
 
+    # -argument [optional]- import character from a JSON file
+    parser.add_argument('--import', metavar='PATH',
+                        help='imports character data from JSON file')
+
     # parse command line arguments
     args = vars(parser.parse_args())
+    
     return args
 
-def set_char_name(char_dir, char_name, prev_value='character'):
-    '''Sets a character's name within a character sheet
+
+def set_char_vals(char_path, char_vals):
+    '''Replaces placeholder values in character sheet template with those that
+    describe a particular character
     
-    :param char_dir directory containing the character sheet
-    :param char_name desired character name 
+    :param char_path directory containing the character sheet
+    :param char_vals dictionary structured according to string.Template 
     '''
-    # replace the current character name with char_name
-    find_and_replace(char_dir + '/main.tex', prev_value, char_name)
-    find_and_replace(char_dir + '/character.tex', 
-                     prev_value.upper(), char_name.upper())
+    # replace placeholder values in character sheet template
+    for x in TEMPLATE_FILES:
+        # read file data
+        template_file = open(char_path + x, 'r')
+        template_data = template_file.read()
+        template_file.close()
+        # apply values to template
+        replace_text = Template(template_data).substitute(char_vals)
+        # write data to file
+        template_file = open(char_path + x, 'w')
+        template_file.write(replace_text)
+        template_file.close()
     
-    # rename the relevant .tex files to reflect the change in character name
-    os.rename('%s/%s.tex' % (char_dir, prev_value),
-              '%s/%s.tex' % (dest_dir, char_name))
+    # rename the character.tex to reflect the change in character name
+    os.rename('%s/character.tex' % char_path,
+              '%s/%s.tex' % (char_path, char_vals['name']))
+    # rename the class1.tex to reflect the change in character name
+    new_path_tuple = (char_path, char_vals['class1'])
+    os.rename('%s/res/latex/class/class1.tex' % char_path,
+              '%s/res/latex/class/%s.tex' % new_path_tuple)
+    os.rename('%s/res/latex/class-features/display/class1.tex' % char_path,
+              '%s/res/latex/class-features/display/%s.tex' % new_path_tuple)
 
 
 # --- Script ---
 if __name__ == '__main__':
     # parse command line arguments
     args = parse_cmd_args()
-
-    dest_dir = args['dest'] + args['char-name']
-    char_name = args['char-name'].lower()
-
-    # create a new character sheet at the desired destination
-    shutil.copytree('template/Character Sheet', dest_dir)
-    set_char_name(dest_dir, char_name)
     
+    # generate character
+    if args['import'] is not None:
+        generate_character(args['dest'], args['import'])
+    else:
+        generate_character(args['dest'])

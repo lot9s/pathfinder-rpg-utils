@@ -12,7 +12,7 @@
 
 % --- *Hit Points ---
 \FPeval{\bonushitpoints}{clip(\characterlevel * \constitutionmod)}
-\FPeval{\hitpoints}{clip(\classonehitpoints + \bonushitpoints)}
+\FPeval{\hitpoints}{clip(\${class1}hitpoints + \bonushitpoints)}
 
 % --- Armor Class
 \armorclass{\ac}{\armoracbonus}{\shieldacbonus}{0}{\dexteritymod}{\dodgeacbonus}{\sizeacbonus}
@@ -20,9 +20,9 @@
 \armorclass{\flatfootedac}{\armoracbonus}{\shieldacbonus}{0}{0}{0}{\sizeacbonus}
 
 % --- Saving Throws
-\FPeval{\basefortitude}{clip(\classonebasefortitude)}
-\FPeval{\basereflex}{clip(\classonebasereflex)}
-\FPeval{\basewill}{clip(\classonebasewill)}
+\FPeval{\basefortitude}{clip(\${class1}basefortitude)}
+\FPeval{\basereflex}{clip(\${class1}basereflex)}
+\FPeval{\basewill}{clip(\${class1}basewill)}
 
 \savingthrow{\fortitude}{\basefortitude}{\constitutionmod}{0}{0}{\resistancebonus}
 \savingthrow{\reflex}{\basereflex}{\dexteritymod}{0}{0}{\resistancebonus}
